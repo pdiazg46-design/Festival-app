@@ -161,17 +161,17 @@ export default function YouTubeRecommender() {
                             </div>
 
                             <div className="flex-1">
-                                <p className="text-white/90 text-[13px] font-medium leading-relaxed italic border-l-2 border-amber-500 pl-3">
-                                    "{rec.technicalReasoning}"
+                                <p className="text-white text-[15px] font-semibold leading-relaxed border-l-3 border-amber-500 pl-4 py-1">
+                                    {rec.technicalReasoning}
                                 </p>
                             </div>
 
-                            <div className="pt-4 border-t border-neutral-800 space-y-2">
-                                <div className="flex items-center gap-2 text-white">
-                                    <AlertTriangle size={12} className="text-amber-500" />
-                                    <span className="text-[10px] font-black uppercase tracking-widest">Observación</span>
+                            <div className="pt-5 border-t border-neutral-800 space-y-3">
+                                <div className="flex items-center gap-2 text-amber-500">
+                                    <AlertTriangle size={16} />
+                                    <span className="text-[11px] font-black uppercase tracking-widest">Observación Técnica</span>
                                 </div>
-                                <p className="text-neutral-400 text-[11px] font-medium leading-snug">
+                                <p className="text-white text-[13px] font-medium leading-relaxed bg-neutral-800/40 p-4 rounded-xl border border-neutral-800">
                                     {rec.weaknesses}
                                 </p>
                             </div>

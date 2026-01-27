@@ -1,0 +1,44 @@
+{
+  "name": "festival-app",
+  "version": "0.1.0",
+  "private": true,
+  "main": "main.js",
+  "scripts": {
+    "dev": "next dev -p 3005",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "electron-dev": "concurrently \"npm run dev\" \"wait-on http://localhost:3000 && .\\node_modules\\.bin\\electron.cmd .\"",
+    "electron-pack": "next build && electron-builder"
+  },
+  "dependencies": {
+    "@clerk/localizations": "^3.35.0",
+    "@clerk/nextjs": "^6.36.8",
+    "clsx": "^2.1.1",
+    "jspdf": "^4.0.0",
+    "jspdf-autotable": "^5.0.7",
+    "lucide-react": "^0.562.0",
+    "next": "^14.2.3",
+    "papaparse": "^5.5.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tailwind-merge": "^3.4.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/papaparse": "^5.5.2",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "autoprefixer": "^10.4.23",
+    "concurrently": "^9.2.1",
+    "electron": "^40.0.0",
+    "electron-builder": "^26.4.0",
+    "eslint": "^8",
+    "eslint-config-next": "^14.2.3",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.3.0",
+    "typescript": "^5",
+    "wait-on": "^9.0.3"
+  }
+}

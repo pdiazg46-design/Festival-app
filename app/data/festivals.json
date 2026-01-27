@@ -1,0 +1,1152 @@
+[
+  {
+    "id": "clermont-ferrand",
+    "name": "Clermont-Ferrand International Short Film Festival",
+    "location": "France",
+    "region": "Europe",
+    "type": "Shorts",
+    "dates": "Jan 31 - Feb 8, 2026",
+    "status": "Upcoming",
+    "fee": "14",
+    "website": "https://clermont-filmfest.org/en",
+    "rules": "https://www.shortfilmdepot.com",
+    "genres": [
+      "Fiction",
+      "Documentary",
+      "Animation",
+      "Experimental",
+      "Drama",
+      "Comedy",
+      "Horror",
+      "Sci-Fi",
+      "Thriller",
+      "Fantasy",
+      "Romance"
+    ],
+    "description": {
+      "en": "The world's largest short film festival, often called the 'Cannes of Shorts'. Oscar, BAFTA, and EFA qualifying.",
+      "es": "El festival de cortometrajes más grande del mundo, a menudo llamado el 'Cannes de los Cortos'. Calificador para Oscar, BAFTA y EFA."
+    },
+    "winners": [
+      {
+        "year": 2025,
+        "title": "Unspoken",
+        "director": "Damian Walshe-Howling",
+        "theme": {
+          "en": "Conflict & Identity",
+          "es": "Conflicto e Identidad"
+        }
+      },
+      {
+        "year": 2025,
+        "title": "Généalogie de la violence",
+        "director": "Mohamed Bourouissa",
+        "theme": {
+          "en": "Social & Historical Legacy",
+          "es": "Legado Social e Histórico"
+        }
+      }
+    ]
+  },
+  {
+    "id": "palm-springs",
+    "name": "Palm Springs International ShortFest",
+    "location": "USA",
+    "region": "North America",
+    "type": "Shorts",
+    "dates": "June 2026",
+    "status": "Upcoming",
+    "fee": "60",
+    "website": "https://www.psfilmfest.org/shortfest-2025",
+    "rules": "https://filmfreeway.com/PalmSpringsInternationalShortFest",
+    "genres": [
+      "Fiction",
+      "Documentary",
+      "Animation",
+      "Drama",
+      "Comedy",
+      "LGBTQ+",
+      "Student",
+      "Romance"
+    ],
+    "description": {
+      "en": "North America's largest short film festival and market. A key stop for Oscar consideration.",
+      "es": "El mercado y festival de cortometrajes más grande de Norteamérica. Parada clave para la consideración al Oscar."
+    },
+    "winners": [
+      {
+        "year": 2025,
+        "title": "Retirement Plan",
+        "director": "John Kelly",
+        "theme": {
+          "en": "Existentialism",
+          "es": "Existencialismo"
+        }
+      }
+    ]
+  },
+  {
+    "id": "hamburg",
+    "name": "Hamburg International Short Film Festival",
+    "location": "Germany",
+    "region": "Europe",
+    "type": "Shorts",
+    "dates": "June 2026",
+    "status": "Upcoming",
+    "fee": "10",
+    "website": "https://festival.shortfilm.com/en",
+    "rules": "https://filmfreeway.com/KurzfilmFestivalHamburg",
+    "genres": [
+      "Fiction",
+      "Documentary",
+      "Animation",
+      "Experimental",
+      "Avant-garde",
+      "Comedy"
+    ],
+    "description": {
+      "en": "Known for experimental and boundary-pushing work. Oscar and BAFTA qualifying.",
+      "es": "Conocido por su trabajo experimental y vanguardista. Calificador para Oscar y BAFTA."
+    },
+    "winners": [
+      {
+        "year": 2025,
+        "title": "Being John Smith",
+        "director": "John Smith",
+        "theme": {
+          "en": "Meta-Cinema",
+          "es": "Meta-Cine"
+        }
+      }
+    ]
+  },
+  {
+    "id": "flickerfest",
+    "name": "Flickerfest",
+    "location": "Australia",
+    "region": "Oceania",
+    "type": "Shorts",
+    "dates": "January 2026",
+    "status": "Upcoming",
+    "fee": "35",
+    "website": "https://flickerfest.com.au/",
+    "rules": "https://filmfreeway.com/flickerfest",
+    "genres": [
+      "Fiction",
+      "Documentary",
+      "Animation",
+      "Comedy",
+      "Drama",
+      "Romance",
+      "Sci-Fi"
+    ],
+    "description": {
+      "en": "Australia's leading Academy Award accredited short film festival.",
+      "es": "El principal festival de cortometrajes de Australia acreditado por la Academia."
+    },
+    "winners": [
+      {
+        "year": 2025,
+        "title": "Changing Rooms",
+        "director": "Violette Gitton",
+        "theme": {
+          "en": "Gender & Violence",
+          "es": "Género y Violencia"
+        }
+      }
+    ]
+  },
+  {
+    "id": "short-shorts",
+    "name": "Short Shorts Film Festival & Asia",
+    "location": "Japan",
+    "region": "Asia",
+    "type": "Shorts",
+    "dates": "June 2026",
+    "status": "Upcoming",
+    "fee": "0",
+    "website": "https://www.shortshorts.org/en/",
+    "rules": "https://www.shortshorts.org/en/creators/",
+    "genres": [
+      "Fiction",
+      "Documentary",
+      "Animation",
+      "Smartphone",
+      "Drama",
+      "Fantasy"
+    ],
+    "description": {
+      "en": "One of the largest in Asia, Academy Award accredited.",
+      "es": "Uno de los más grandes de Asia, acreditado por la Academia."
+    },
+    "winners": [
+      {
+        "year": 2025,
+        "title": "Torn Pantyhose",
+        "director": "Fabian Munsty-Jaam",
+        "theme": {
+          "en": "Society",
+          "es": "Sociedad"
+        }
+      }
+    ]
+  },
+  {
+    "id": "vienna-shorts",
+    "name": "Vienna Shorts",
+    "location": "Austria",
+    "region": "Europe",
+    "type": "Shorts",
+    "dates": "May 2026",
+    "status": "Upcoming",
+    "fee": "17",
+    "website": "https://www.viennashorts.com/en",
+    "rules": "https://filmfreeway.com/ViennaShorts",
+    "genres": [
+      "Fiction",
+      "Documentary",
+      "Animation",
+      "Experimental",
+      "Music Video",
+      "Political",
+      "Avant-garde"
+    ],
+    "description": {
+      "en": "Qualifying for Oscars, EFA, and BAFTA. Strong focus on political and artistic cinema.",
+      "es": "Calificador para Oscar, EFA y BAFTA. Fuerte enfoque en cine político y artístico."
+    },
+    "winners": [
+      {
+        "year": 2025,
+        "title": "Razeh-del",
+        "director": "Maryam Tafakory",
+        "theme": {
+          "en": "Gender & Liberation",
+          "es": "Género y Liberación"
+        }
+      }
+    ]
+  },
+  {
+    "id": "oberhausen",
+    "name": "Oberhausen International Short Film Festival",
+    "location": "Germany",
+    "region": "Europe",
+    "type": "Shorts",
+    "dates": "May 2026",
+    "status": "Upcoming",
+    "fee": "15",
+    "website": "https://www.kurzfilmtage.de/en/",
+    "rules": "https://www.kurzfilmtage.de/en/submission/",
+    "genres": [
+      "Fiction",
+      "Documentary",
+      "Animation",
+      "Experimental",
+      "Music Video",
+      "Family",
+      "Children"
+    ],
+    "description": {
+      "en": "The oldest short film festival in the world, known for experimental works.",
+      "es": "El festival de cortometrajes más antiguo del mundo, conocido por obras experimentales."
+    },
+    "winners": [
+      {
+        "year": 2025,
+        "title": "Jailoogo Karay Uzak Jol",
+        "director": "Ilgiz-Sherniiaz Tursunbek uulu",
+        "theme": {
+          "en": "Nature & Tradition",
+          "es": "Naturaleza y Tradición"
+        }
+      }
+    ]
+  },
+  {
+    "id": "encounters",
+    "name": "Encounters",
+    "location": "UK",
+    "region": "Europe",
+    "type": "Shorts",
+    "dates": "September 2026",
+    "status": "Upcoming",
+    "fee": "25",
+    "website": "https://www.encounters.film/",
+    "rules": "https://filmfreeway.com/EncountersFilmFestival",
+    "genres": [
+      "Fiction",
+      "Documentary",
+      "Animation",
+      "Experimental",
+      "Comedy",
+      "Thriller"
+    ],
+    "description": {
+      "en": "Bristol-based, qualifying for BAFTA, BIFA, and EFA.",
+      "es": "Con sede en Bristol, calificador para BAFTA, BIFA y EFA."
+    },
+    "winners": [
+      {
+        "year": 2025,
+        "title": "The Last People",
+        "director": "Nicolás Pindeus",
+        "theme": {
+          "en": "End of Era",
+          "es": "Fin de una Era"
+        }
+      }
+    ]
+  },
+  {
+    "id": "busan",
+    "name": "Busan International Short Film Festival",
+    "location": "South Korea",
+    "region": "Asia",
+    "type": "Shorts",
+    "dates": "April 2026",
+    "status": "Upcoming",
+    "fee": "15",
+    "website": "http://www.bisff.org/eng/",
+    "rules": "https://filmfreeway.com/BusanInternationalShortFilmFestival",
+    "genres": [
+      "Fiction",
+      "Documentary",
+      "Animation",
+      "Experimental",
+      "Asian Cinema",
+      "Drama"
+    ],
+    "description": {
+      "en": "The oldest short film festival in Korea. Oscar-qualifying.",
+      "es": "El festival de cortometrajes más antiguo de Corea. Calificador para el Oscar."
+    },
+    "winners": [
+      {
+        "year": 2025,
+        "title": "Goodbye Sun",
+        "director": "Hakim Atoui",
+        "theme": {
+          "en": "International Narrative",
+          "es": "Narrativa Internacional"
+        }
+      },
+      {
+        "year": 2024,
+        "title": "The Birthday Party",
+        "director": "Francesco Sossai",
+        "theme": {
+          "en": "Family",
+          "es": "Familia"
+        }
+      }
+    ]
+  },
+  {
+    "id": "bogoshorts",
+    "name": "Bogotá Short Film Festival (Bogoshorts)",
+    "location": "Colombia",
+    "region": "South America",
+    "type": "Shorts",
+    "dates": "December 1 - 8, 2026 (Expected)",
+    "status": "Upcoming",
+    "fee": "10",
+    "website": "https://festival.bogoshorts.com/",
+    "rules": "https://www.shortfilmdepot.com",
+    "genres": [
+      "Fiction",
+      "Documentary",
+      "Animation",
+      "Experimental",
+      "Music Video",
+      "VR",
+      "Horror",
+      "Sci-Fi",
+      "Fantasy",
+      "Fan Freak"
+    ],
+    "description": {
+      "en": "The most important short film festival in Latin America. Oscar qualifying.",
+      "es": "El festival de cortometrajes más importante de América Latina. Calificador para el Oscar."
+    },
+    "winners": [
+      {
+        "year": 2025,
+        "title": "Agachar el rostro",
+        "director": "Camilo Medina Noy",
+        "theme": {
+          "en": "Rural School & Memory",
+          "es": "Escuela Rural y Memoria"
+        }
+      },
+      {
+        "year": 2025,
+        "title": "Agapito",
+        "director": "Arvin Belarmino & Kyla Romero",
+        "theme": {
+          "en": "Labor & Daily Life",
+          "es": "Trabajo y Vida Diaria"
+        }
+      },
+      {
+        "year": 2024,
+        "title": "Malicia",
+        "director": "Edward Gómez",
+        "theme": {
+          "en": "Friendship & Violence",
+          "es": "Amistad y Violencia"
+        }
+      },
+      {
+        "year": 2024,
+        "title": "Estamos en el mapa",
+        "director": "Santiago Rodríguez",
+        "theme": {
+          "en": "Identity",
+          "es": "Identidad"
+        }
+      }
+    ]
+  },
+  {
+    "id": "curta-cinema",
+    "name": "Curta Cinema Rio de Janeiro",
+    "location": "Brazil",
+    "region": "South America",
+    "type": "Shorts",
+    "dates": "April 2026",
+    "status": "Upcoming",
+    "fee": "10",
+    "website": "https://curtacinema.com.br/en/",
+    "rules": "https://filmfreeway.com/CurtaCinemaRio",
+    "genres": [
+      "Fiction",
+      "Documentary",
+      "Animation",
+      "Experimental",
+      "Latin American",
+      "Social Realism"
+    ],
+    "description": {
+      "en": "Key Brazilian festival, qualifying for Oscars. Focus on diverse voices.",
+      "es": "Festival brasileño clave, calificador para Oscars. Enfoque en voces diversas."
+    },
+    "winners": [
+      {
+        "year": 2025,
+        "title": "Moti",
+        "director": "André Okuma",
+        "theme": {
+          "en": "Social Realism (National)",
+          "es": "Realismo Social (Nacional)"
+        }
+      },
+      {
+        "year": 2025,
+        "title": "Green Gray Black Brown",
+        "director": "Yuyan Wang",
+        "theme": {
+          "en": "Experimental (International)",
+          "es": "Experimental (Internacional)"
+        }
+      }
+    ]
+  },
+  {
+    "id": "ficci",
+    "name": "FICCI (Cartagena International Film Festival)",
+    "location": "Colombia",
+    "region": "South America",
+    "type": "Mixed",
+    "dates": "April 2026",
+    "status": "Upcoming",
+    "fee": "30",
+    "website": "https://ficcifestival.com/",
+    "rules": "https://filmmakers.festhome.com/festival/ficci-festival-internacional-de-cine-de-cartagena-de-indias",
+    "genres": [
+      "Fiction",
+      "Documentary",
+      "Animation",
+      "Experimental",
+      "Drama",
+      "Social",
+      "Indigenous"
+    ],
+    "description": {
+      "en": "The oldest film festival in Latin America, championing Ibero-American cinema.",
+      "es": "El festival de cine más antiguo de América Latina, defensor del cine iberoamericano."
+    },
+    "winners": [
+      {
+        "year": 2025,
+        "title": "Adiós al amigo",
+        "director": "Iván Gaona",
+        "theme": {
+          "en": "Reconciliation & Conflict",
+          "es": "Reconciliación y Conflicto"
+        }
+      },
+      {
+        "year": 2024,
+        "title": "Niña Chilapa",
+        "director": "Juana Lotero",
+        "theme": {
+          "en": "Coming of Age & Nature",
+          "es": "Crecimiento y Naturaleza"
+        }
+      }
+    ]
+  },
+  {
+    "id": "sanfic",
+    "name": "SANFIC (Santiago International Film Festival)",
+    "location": "Chile",
+    "region": "Chile",
+    "type": "Mixed",
+    "dates": "August 2026",
+    "status": "Upcoming",
+    "fee": "30",
+    "website": "https://sanfic.com/",
+    "rules": "https://filmmakers.festhome.com/festival/sanfic-santiago-festival-internacional-de-cine",
+    "genres": [
+      "Fiction",
+      "Documentary",
+      "Drama",
+      "Thriller",
+      "Crime",
+      "Comedy"
+    ],
+    "description": {
+      "en": "Chile's primary festival, featuring international and national competitions.",
+      "es": "El festival principal de Chile, con competencias internacionales y nacionales."
+    },
+    "winners": [
+      {
+        "year": 2025,
+        "title": "Un Poeta",
+        "director": "Simón Mesa Soto",
+        "theme": {
+          "en": "Artistic Aspirations & Youth",
+          "es": "Aspiraciones Artísticas y Juventud"
+        }
+      },
+      {
+        "year": 2024,
+        "title": "Estado de silencio",
+        "director": "Santiago Maza",
+        "theme": {
+          "en": "Journalism & Danger",
+          "es": "Periodismo y Peligro"
+        }
+      }
+    ]
+  },
+  {
+    "id": "ficvaldivia",
+    "name": "FICValdivia",
+    "location": "Chile",
+    "region": "Chile",
+    "type": "Mixed",
+    "dates": "October 2026",
+    "status": "Upcoming",
+    "fee": "30",
+    "website": "http://ficvaldivia.cl/",
+    "rules": "https://filmmakers.festhome.com/festival/ficvaldivia-festival-internacional-de-cine-de-valdivia",
+    "genres": [
+      "Fiction",
+      "Documentary",
+      "Animation",
+      "Experimental",
+      "Art House",
+      "Drama"
+    ],
+    "description": {
+      "en": "Renowned for its curatorial independence and focus on auteur cinema.",
+      "es": "Reconocido por su independencia curatorial y enfoque en el cine de autor."
+    },
+    "winners": [
+      {
+        "year": 2025,
+        "title": "Wind, Talk to Me",
+        "director": "Stefan Djordjevic",
+        "theme": {
+          "en": "Family Memory & Bonds",
+          "es": "Memoria Familiar y Vínculos"
+        }
+      },
+      {
+        "year": 2024,
+        "title": "¡Aoquic iez in Mexico!",
+        "director": "Annalisa Quagliata",
+        "theme": {
+          "en": "Experimental & History",
+          "es": "Experimental e Historia"
+        }
+      }
+    ]
+  },
+  {
+    "id": "mar-del-plata",
+    "name": "Mar del Plata International Film Festival",
+    "location": "Argentina",
+    "region": "South America",
+    "type": "Feature",
+    "dates": "November 2026",
+    "status": "Upcoming",
+    "fee": "25",
+    "website": "https://www.mardelplatafilmfest.com/en/",
+    "rules": "https://www.mardelplatafilmfest.com/en/seccion/reglamentos",
+    "genres": [
+      "Fiction",
+      "Documentary",
+      "Animation",
+      "Experimental",
+      "Horror",
+      "Thriller",
+      "Sci-Fi",
+      "Fantasy",
+      "Gore"
+    ],
+    "description": {
+      "en": "The only Grade A festival in Latin America, prioritizing ambitious international cinema.",
+      "es": "El único festival de Clase A en América Latina, priorizando el cine internacional ambicioso."
+    },
+    "winners": [
+      {
+        "year": 2025,
+        "title": "Calle Málaga",
+        "director": "Maryam Touzani",
+        "theme": {
+          "en": "Memory & Past",
+          "es": "Memoria y Pasado"
+        }
+      },
+      {
+        "year": 2025,
+        "title": "Vache Folle",
+        "director": "Hugo Diego Garcia & Lorenzo Bentivoglio",
+        "theme": {
+          "en": "Reflections on Violence",
+          "es": "Reflexiones sobre la Violencia"
+        }
+      },
+      {
+        "year": 2025,
+        "title": "Risa y la cabina del viento",
+        "director": "Juan Cabral",
+        "theme": {
+          "en": "Humanity & Fantasy",
+          "es": "Humanidad y Fantasía"
+        }
+      },
+      {
+        "year": 2025,
+        "title": "3000km en bicicleta",
+        "director": "Iván Vescovo",
+        "theme": {
+          "en": "Latin American Identity",
+          "es": "Identidad Latinoamericana"
+        }
+      },
+      {
+        "year": 2024,
+        "title": "Au bord du monde",
+        "director": "Guérin van de Voorst",
+        "theme": {
+          "en": "Family & Loss",
+          "es": "Familia y Pérdida"
+        }
+      }
+    ]
+  },
+  {
+    "id": "bafici",
+    "name": "BAFICI",
+    "location": "Argentina",
+    "region": "South America",
+    "type": "Mixed",
+    "dates": "April 2026",
+    "status": "Upcoming",
+    "fee": "0",
+    "website": "https://bafici.org/",
+    "rules": "https://bafici.org/",
+    "genres": [
+      "Fiction",
+      "Documentary",
+      "Animation",
+      "Experimental",
+      "Avant-garde",
+      "Comedy",
+      "Musical",
+      "Indie"
+    ],
+    "description": {
+      "en": "Buenos Aires International Festival of Independent Cinema, known for discovering new talent.",
+      "es": "Festival Internacional de Cine Independiente de Buenos Aires, conocido por descubrir nuevos talentos."
+    },
+    "winners": [
+      {
+        "year": 2025,
+        "title": "Bajo las banderas, el sol",
+        "director": "Juanjo Pereira",
+        "theme": {
+          "en": "Legacy & Archives",
+          "es": "Legado y Archivos"
+        }
+      },
+      {
+        "year": 2024,
+        "title": "La parra",
+        "director": "Alberto Gracia",
+        "theme": {
+          "en": "Surrealism & Decadence",
+          "es": "Surrealismo y Decadencia"
+        }
+      }
+    ]
+  },
+  {
+    "id": "guadalajara",
+    "name": "Guadalajara International Film Festival (FICG)",
+    "location": "Mexico",
+    "region": "Mexico",
+    "type": "Mixed",
+    "dates": "June 2026",
+    "status": "Upcoming",
+    "fee": "10",
+    "website": "https://ficg.mx/",
+    "rules": "https://ficg.mx/en/convocatoria-ficg-41",
+    "genres": [
+      "Fiction",
+      "Documentary",
+      "Animation",
+      "Experimental",
+      "LGBTQ+",
+      "Drama",
+      "Social"
+    ],
+    "description": {
+      "en": "A vital showcase for Mexican and Ibero-American cinema.",
+      "es": "Una vitrina vital para el cine mexicano e iberoamericano."
+    },
+    "winners": [
+      {
+        "year": 2025,
+        "title": "Llamarse Olimpia",
+        "director": "Indira Cato",
+        "theme": {
+          "en": "Memory & Resistance",
+          "es": "Memoria y Resistencia"
+        }
+      },
+      {
+        "year": 2024,
+        "title": "No nos moverán",
+        "director": "Pierre Saint Martin",
+        "theme": {
+          "en": "Justice & Memory",
+          "es": "Justicia y Memoria"
+        }
+      }
+    ]
+  },
+  {
+    "id": "morelia",
+    "name": "Morelia International Film Festival (FICM)",
+    "location": "Mexico",
+    "region": "Mexico",
+    "type": "Mixed",
+    "dates": "October 2026",
+    "status": "Upcoming",
+    "fee": "30",
+    "website": "https://moreliafilmfest.com/",
+    "rules": "https://moreliafilmfest.com/",
+    "genres": [
+      "Fiction",
+      "Documentary",
+      "Animation",
+      "Drama",
+      "Indigenous"
+    ],
+    "description": {
+      "en": "Key launchpad for Mexican cinema, often debuting future Oscar contenders.",
+      "es": "Plataforma clave para el cine mexicano, a menudo estrenando futuros contendientes al Oscar."
+    },
+    "winners": [
+      {
+        "year": 2025,
+        "title": "La reserva",
+        "director": "Pablo Pérez Lombardini",
+        "theme": {
+          "en": "Memory & Spaces",
+          "es": "Memoria y Espacios"
+        }
+      },
+      {
+        "year": 2024,
+        "title": "Sujo",
+        "director": "Fernanda Valadez & Astrid Rondero",
+        "theme": {
+          "en": "Violence & Innocence",
+          "es": "Violencia e Inocencia"
+        }
+      }
+    ]
+  },
+  {
+    "id": "sundance",
+    "name": "Sundance Film Festival",
+    "location": "USA",
+    "region": "North America",
+    "type": "Mixed",
+    "dates": "January 22 - February 1, 2026",
+    "status": "Starting Jan 22",
+    "fee": "65",
+    "website": "https://www.sundance.org/",
+    "rules": "https://filmfreeway.com/Sundance",
+    "genres": [
+      "Fiction",
+      "Documentary",
+      "Animation",
+      "Experimental",
+      "New Frontier",
+      "Drama",
+      "Horror",
+      "Thriller",
+      "Queer",
+      "Comedy"
+    ],
+    "description": {
+      "en": "The premier independent film festival in the US.",
+      "es": "El principal festival de cine independiente en los EE. UU."
+    },
+    "winners": [
+      {
+        "year": 2025,
+        "title": "Atropia",
+        "director": "Hailey Gates",
+        "theme": {
+          "en": "War & Surrealism",
+          "es": "Guerra y Surrealismo"
+        }
+      },
+      {
+        "year": 2025,
+        "title": "Sabar Bonda (Cactus Pears)",
+        "director": "Rohan Parashuram Kanawade",
+        "theme": {
+          "en": "Marathi Cinema & Identity",
+          "es": "Cine Marathi e Identidad"
+        }
+      }
+    ]
+  },
+  {
+    "id": "tiff",
+    "name": "Toronto International Film Festival",
+    "location": "Canada",
+    "region": "North America",
+    "type": "Mixed",
+    "dates": "September 2026",
+    "status": "Upcoming",
+    "fee": "50",
+    "website": "https://tiff.net/",
+    "rules": "https://filmfreeway.com/TIFF",
+    "genres": [
+      "Fiction",
+      "Documentary",
+      "Animation",
+      "Drama",
+      "Horror",
+      "Sci-Fi",
+      "Thriller",
+      "Midnight Madness",
+      "War",
+      "Biopic"
+    ],
+    "description": {
+      "en": "One of the most prestigious festivals, famous for validiting Oscar frontrunners.",
+      "es": "Uno de los festivales más prestigiosos, famoso por validar a los favoritos al Oscar."
+    },
+    "winners": [
+      {
+        "year": 2025,
+        "title": "Hamnet",
+        "director": "Chloé Zhao",
+        "theme": {
+          "en": "Grief & Motherhood",
+          "es": "Duelo y Maternidad"
+        }
+      },
+      {
+        "year": 2024,
+        "title": "The Life of Chuck",
+        "director": "Mike Flanagan",
+        "theme": {
+          "en": "Life & Metaphysics",
+          "es": "Vida y Metafísica"
+        }
+      }
+    ]
+  },
+  {
+    "id": "sxsw",
+    "name": "SXSW Film Festival",
+    "location": "USA",
+    "region": "North America",
+    "type": "Mixed",
+    "dates": "March 2026",
+    "status": "Upcoming",
+    "fee": "55",
+    "website": "https://www.sxsw.com/festivals/film/",
+    "rules": "https://www.sxsw.com/festivals/film/submissions/",
+    "genres": [
+      "Fiction",
+      "Documentary",
+      "Animation",
+      "Music Video",
+      "XR",
+      "Sci-Fi",
+      "Horror",
+      "Comedy",
+      "Thriller",
+      "Action"
+    ],
+    "description": {
+      "en": "A destination for original, iconoclastic work in film and media.",
+      "es": "Un destino para trabajos originales e iconoclastas en cine y medios."
+    },
+    "winners": [
+      {
+        "year": 2025,
+        "title": "Slanted",
+        "director": "Amy Wang",
+        "theme": {
+          "en": "Identity & Beauty Standards",
+          "es": "Identidad y Estándares de Belleza"
+        }
+      },
+      {
+        "year": 2024,
+        "title": "Bob Trevino Likes It",
+        "director": "Tracie Laymon",
+        "theme": {
+          "en": "Connection & Technology",
+          "es": "Conexión y Tecnología"
+        }
+      }
+    ]
+  },
+  {
+    "id": "chicago",
+    "name": "Chicago International Film Festival",
+    "location": "USA",
+    "region": "North America",
+    "type": "Mixed",
+    "dates": "October 2026",
+    "status": "Upcoming",
+    "fee": "40",
+    "website": "https://www.chicagofilmfestival.com/",
+    "rules": "https://filmfreeway.com/ChicagoInternationalFilmFestival",
+    "genres": [
+      "Fiction",
+      "Documentary",
+      "Animation",
+      "Drama",
+      "Comedy",
+      "Thriller",
+      "Romance",
+      "Social"
+    ],
+    "description": {
+      "en": "North America's longest-running competitive film festival.",
+      "es": "El festival de cine competitivo más antiguo de Norteamérica."
+    },
+    "winners": [
+      {
+        "year": 2025,
+        "title": "SIRÂT",
+        "director": "Oliver Laxe",
+        "theme": {
+          "en": "Existence & Spain",
+          "es": "Existencia y España"
+        }
+      },
+      {
+        "year": 2024,
+        "title": "Vermiglio",
+        "director": "Maura Delpero",
+        "theme": {
+          "en": "Family & War",
+          "es": "Familia y Guerra"
+        }
+      }
+    ]
+  },
+  {
+    "id": "inedit-chile",
+    "name": "IN-EDIT CHILE",
+    "location": "Santiago, Chile",
+    "region": "Chile",
+    "type": "Documentary",
+    "dates": "December 2026",
+    "status": "Upcoming",
+    "fee": "10",
+    "website": "https://www.inedit.cl/",
+    "rules": "https://www.inedit.cl/",
+    "genres": [
+      "Music Documentary",
+      "Documentary"
+    ],
+    "description": {
+      "en": "International Music Documentary Film Festival. The only festival in Chile dedicated to music and cinema.",
+      "es": "Festival Internacional de Cine Documental Musical. El único festival en Chile dedicado a la música y el cine."
+    },
+    "winners": [
+      {
+        "year": 2025,
+        "title": "Calambre: En la cancha se ven los gallos",
+        "director": "Aldo Guerrero & Jorge Collao",
+        "theme": {
+          "en": "Hip-Hop & Friendship",
+          "es": "Hip-Hop y Amistad"
+        }
+      },
+      {
+        "year": 2024,
+        "title": "En Septiembre Canta el Gallo",
+        "director": "Nano Stern",
+        "theme": {
+          "en": "Music & History",
+          "es": "Música e Historia"
+        }
+      }
+    ]
+  },
+  {
+    "id": "santiago-wild",
+    "name": "Santiago Wild Fest",
+    "location": "Santiago, Chile",
+    "region": "Chile",
+    "type": "Documentary",
+    "dates": "May 2026",
+    "status": "Upcoming",
+    "fee": "0",
+    "website": "https://santiagowild.com/",
+    "rules": "https://santiagowild.com/",
+    "genres": [
+      "Nature",
+      "Wildlife",
+      "Environment",
+      "Documentary"
+    ],
+    "description": {
+      "en": "Latin America's pioneering wildlife and environment film festival.",
+      "es": "Festival de cine de vida salvaje y medio ambiente pionero en Latinoamérica."
+    },
+    "winners": [
+      {
+        "year": 2025,
+        "title": "El nido de la Golondrina",
+        "director": "Unknown",
+        "theme": {
+          "en": "Nature & Documentation",
+          "es": "Naturaleza y Documentación"
+        }
+      },
+      {
+        "year": 2023,
+        "title": "Chungungo",
+        "director": "René A.",
+        "theme": {
+          "en": "Conservation",
+          "es": "Conservación"
+        }
+      }
+    ]
+  },
+  {
+    "id": "fecich",
+    "name": "FECICH (Festival de Cine Chileno)",
+    "location": "Quilpué, Chile",
+    "region": "Chile",
+    "type": "Mixed",
+    "dates": "January 2026",
+    "status": "Upcoming",
+    "fee": "0",
+    "website": "https://fecich.cl/",
+    "rules": "https://fecich.cl/",
+    "genres": [
+      "Fiction",
+      "Documentary",
+      "Animation",
+      "Chilean Cinema"
+    ],
+    "description": {
+      "en": "Festival dedicated exclusively to promoting and awarding Chilean cinema.",
+      "es": "Festival dedicado exclusivamente a promover y premiar el cine chileno."
+    },
+    "winners": [
+      {
+        "year": 2025,
+        "title": "Denominación de origen",
+        "director": "Unknown",
+        "theme": {
+          "en": "Chilean Identity",
+          "es": "Identidad Chilena"
+        }
+      },
+      {
+        "year": 2024,
+        "title": "El que baila pasa",
+        "director": "Carlos A.",
+        "theme": {
+          "en": "Social Identity",
+          "es": "Identidad Social"
+        }
+      }
+    ]
+  },
+  {
+    "id": "femcine",
+    "name": "FEMCINE (Festival Cine de Mujeres)",
+    "location": "Santiago, Chile",
+    "region": "Chile",
+    "type": "Mixed",
+    "dates": "March 2026",
+    "status": "Upcoming",
+    "fee": "0",
+    "website": "https://femcine.cl/",
+    "rules": "https://femcine.cl/",
+    "genres": [
+      "Women Filmmakers",
+      "Feminist",
+      "Fiction",
+      "Documentary"
+    ],
+    "description": {
+      "en": "Festival dedicated to cinema made by women, focusing on gender equality.",
+      "es": "Festival dedicado al cine hecho por mujeres, enfocado en la equidad de género."
+    },
+    "winners": [
+      {
+        "year": 2025,
+        "title": "78 Dana",
+        "director": "Emilija Gašić",
+        "theme": {
+          "en": "Intimacy & Memory",
+          "es": "Intimidad y Memoria"
+        }
+      },
+      {
+        "year": 2024,
+        "title": "Malqueridas",
+        "director": "Tana Gilbert",
+        "theme": {
+          "en": "Motherhood & Prison",
+          "es": "Maternidad y Cárcel"
+        }
+      }
+    ]
+  }
+]

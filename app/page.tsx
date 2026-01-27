@@ -1,6 +1,6 @@
 "use client";
 
-import { Calendar, Trophy, TrendingUp, Lightbulb, RefreshCw, BarChart2, Clapperboard } from "lucide-react";
+import { Calendar, Trophy, TrendingUp, Lightbulb, RefreshCw, BarChart2, Clapperboard, Crown } from "lucide-react";
 import Link from "next/link";
 import localFestivals from "./data/festivals.json";
 import { cn } from "./lib/utils";
@@ -185,8 +185,26 @@ function Dashboard() {
         </Link>
 
         {/* Nueva Funcionalidad: Recomendador por Link de YouTube */}
-        <section className="mt-12 pt-12 border-t border-neutral-900">
-          <YouTubeRecommender />
+        <section className="mt-12 pt-12 border-t border-neutral-900 relative">
+          {!isPremium && (
+            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-neutral-950/40 backdrop-blur-[2px] rounded-2xl border border-amber-500/10 transition-all">
+              <div className="p-4 bg-neutral-900 border border-amber-500/30 rounded-2xl shadow-2xl flex flex-col items-center text-center max-w-sm mx-auto">
+                <Crown className="text-amber-500 mb-3 animate-pulse" size={40} />
+                <h3 className="text-xl font-bold text-white mb-2">Función Premium</h3>
+                <p className="text-neutral-400 text-sm mb-6">
+                  El análisis científico de afinidad histórica por IA es parte de la versión Full.
+                  ¡Desbloquea el poder del algoritmo hoy!
+                </p>
+                {/* Nota: Aquí podríamos abrir el modal de upgrade si tuviéramos esa función accesible */}
+                <Link href="/studio" className="px-6 py-2 bg-amber-500 text-black font-bold rounded-lg hover:bg-amber-600 transition-colors">
+                  Ver Planes de Acceso
+                </Link>
+              </div>
+            </div>
+          )}
+          <div className={cn("transition-all duration-700", !isPremium && "opacity-20 blur-[1px] pointer-events-none")}>
+            <YouTubeRecommender />
+          </div>
         </section>
         <div className="mt-12 p-6 bg-neutral-900/50 rounded-2xl border border-neutral-800 text-sm text-neutral-400 leading-relaxed max-w-4xl mx-auto">
           <div className="flex items-center gap-3 mb-3">

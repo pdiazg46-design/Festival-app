@@ -12,7 +12,10 @@ export interface Recommendation {
     };
 }
 
-export function analyzeYouTubeLink(url: string): Promise<Recommendation[]> {
+export function analyzeYouTubeLink(url: string, videoTitle?: string, authorName?: string): Promise<Recommendation[]> {
+    const displayTitle = videoTitle || "la obra analizada";
+    const displayAuthor = authorName ? ` de ${authorName}` : "";
+
     // Simulación de análisis técnico y elegante
     return new Promise((resolve) => {
         setTimeout(() => {
@@ -30,10 +33,10 @@ export function analyzeYouTubeLink(url: string): Promise<Recommendation[]> {
                         festivalId: fest.id,
                         festivalName: fest.name,
                         affinityScore: Math.min(affinity, 99),
-                        technicalReasoning: `La narrativa visual detectada presenta una cadencia rítmica muy similar a "${winner.title}", ganador en ${winner.year}. El uso de la profundidad de campo y el tratamiento cromático sugiere una madurez técnica que resuena con la línea curatorial de ${fest.location}.`,
+                        technicalReasoning: `Tras analizar "${displayTitle}"${displayAuthor}, se detecta una arquitectura visual que dialoga directamente con la estética de "${winner.title}". La gestión de los espacios negativos y el tempo interno de la obra sugieren una madurez técnica comparable a las producciones que ${fest.location} ha premiado históricamente.`,
                         weaknesses: index === 0
-                            ? "Se observa una ligera inconsistencia en el diseño sonoro durante las transiciones del segundo acto. Un tratamiento más diegético fortalecería la inmersión."
-                            : "La estructura del tercer acto podría beneficiarse de un montaje más elíptico para evitar la redundancia informativa.",
+                            ? `Aunque "${displayTitle}" posee una fuerza visual innegable, se observa una ligera inconsistencia en el diseño sonoro durante las transiciones críticas. Refinar la espacialidad del audio elevaría el impacto narrativo.`
+                            : `La estructura de "${displayTitle}" podría beneficiarse de un montaje más elíptico en su tramo medio para evitar la saturación de información y potenciar la curiosidad del espectador.`,
                         matchingWinner: {
                             title: winner.title,
                             theme: winner.theme.es

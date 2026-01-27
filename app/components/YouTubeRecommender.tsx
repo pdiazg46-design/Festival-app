@@ -53,136 +53,125 @@ export default function YouTubeRecommender() {
     };
 
     return (
-        <div className="w-full max-w-4xl mx-auto space-y-10 py-16 px-4">
-            {/* Header Sección - Alto Contraste */}
-            <div className="text-center space-y-6">
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-amber-500 rounded-full text-black text-[10px] font-black uppercase tracking-[0.2em]">
-                    <Sparkles size={14} />
-                    Versión Full Solamente
+        <div className="w-full max-w-4xl mx-auto space-y-10 py-12 px-4">
+            {/* Header Sección - Escala más refinada */}
+            <div className="text-center space-y-4">
+                <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-500 rounded-full text-black text-[9px] font-black uppercase tracking-wider">
+                    <Sparkles size={12} />
+                    Versión Premium
                 </div>
-                <h2 className="text-4xl font-black tracking-tight text-white sm:text-5xl lg:text-6xl">
+                <h2 className="text-3xl font-black tracking-tight text-white sm:text-4xl">
                     Análisis de Afinidad <span className="text-amber-500">Histórica</span>
                 </h2>
-                <p className="text-white text-lg md:text-xl max-w-3xl mx-auto font-medium leading-relaxed opacity-90">
-                    Pega el enlace de tu obra. Nuestro sistema escanea automáticamente la metadata de YouTube
-                    para contrastarla con el ADN artístico de los festivales clase A.
+                <p className="text-white/80 text-base md:text-lg max-w-2xl mx-auto font-medium leading-relaxed">
+                    Nuestro sistema escanea la metadata de YouTube para contrastar tu obra
+                    con el ADN artístico de los festivales clase A.
                 </p>
             </div>
 
-            {/* Formulario y Meta de Obra */}
+            {/* Formulario */}
             <div className="space-y-6">
                 <form onSubmit={handleAnalyze} className="relative group">
                     <div className="absolute -inset-1 bg-gradient-to-r from-red-600 via-amber-500 to-amber-600 rounded-2xl blur-md opacity-20 group-focus-within:opacity-60 transition duration-1000"></div>
-                    <div className="relative flex flex-col md:flex-row items-stretch bg-neutral-900 border-2 border-neutral-800 rounded-2xl p-2 gap-2">
-                        <div className="flex-1 flex items-center px-4 py-3 md:py-0">
-                            <Youtube className="text-red-500 mr-4 shrink-0" size={32} />
+                    <div className="relative flex flex-col md:flex-row items-stretch bg-neutral-900 border-2 border-neutral-800 rounded-2xl p-1.5 gap-2">
+                        <div className="flex-1 flex items-center px-4 py-2 md:py-0">
+                            <Youtube className="text-red-500 mr-3 shrink-0" size={28} />
                             <input
                                 type="text"
-                                placeholder="Pega el link de YouTube aquí..."
+                                placeholder="Link de YouTube..."
                                 value={url}
                                 onChange={(e) => setUrl(e.target.value)}
-                                className="flex-1 bg-transparent border-none focus:ring-0 text-white placeholder-neutral-500 text-xl font-bold"
+                                className="flex-1 bg-transparent border-none focus:ring-0 text-white placeholder-neutral-500 text-lg font-bold"
                             />
-                            {fetchingMetadata && <Loader2 size={24} className="animate-spin text-amber-500 ml-2" />}
+                            {fetchingMetadata && <Loader2 size={20} className="animate-spin text-amber-500 ml-2" />}
                         </div>
                         <button
                             type="submit"
                             disabled={loading || !url}
-                            className="px-8 py-5 bg-white text-black font-black text-lg rounded-xl hover:bg-amber-500 hover:text-black transition-all disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-3 uppercase shadow-lg"
+                            className="px-6 py-4 bg-white text-black font-black text-base rounded-xl hover:bg-amber-500 hover:text-black transition-all disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-2 uppercase shadow-lg"
                         >
                             {loading ? (
                                 <>
-                                    <Loader2 size={24} className="animate-spin" />
-                                    Procesando...
+                                    <Loader2 size={20} className="animate-spin" />
+                                    Analizando...
                                 </>
                             ) : (
                                 <>
-                                    Analizar Obra
-                                    <ChevronRight size={24} />
+                                    Analizar
+                                    <ChevronRight size={20} />
                                 </>
                             )}
                         </button>
                     </div>
                 </form>
 
-                {/* Obra Detectada - Gran Legibilidad */}
+                {/* Obra Detectada - Tamaño más elegante */}
                 {(title || author) && (
-                    <div className="animate-in fade-in zoom-in duration-500 flex flex-col md:flex-row items-center gap-6 px-8 py-6 bg-white border-2 border-amber-500 rounded-3xl shadow-[0_0_40px_rgba(245,158,11,0.15)] max-w-3xl mx-auto relative overflow-hidden">
-                        <div className="absolute top-0 right-0 p-2 bg-amber-500 text-black font-black text-[9px] uppercase tracking-widest px-3 rounded-bl-xl">
-                            Obra Detectada
+                    <div className="animate-in fade-in zoom-in duration-500 flex flex-col md:flex-row items-center gap-4 px-6 py-4 bg-white border-2 border-amber-500 rounded-2xl shadow-xl max-w-2xl mx-auto relative overflow-hidden">
+                        <div className="p-3 bg-black rounded-xl text-amber-500">
+                            <Clapperboard size={32} strokeWidth={2.5} />
                         </div>
-                        <div className="p-4 bg-black rounded-2xl text-amber-500 shadow-xl">
-                            <Clapperboard size={44} strokeWidth={2.5} />
-                        </div>
-                        <div className="flex-1 text-center md:text-left space-y-1">
-                            <h4 className="text-black text-2xl md:text-3xl font-black leading-tight">
-                                {title || "Cargando título..."}
+                        <div className="flex-1 text-center md:text-left">
+                            <h4 className="text-black text-xl font-black leading-tight">
+                                {title || "Cargando..."}
                             </h4>
-                            <div className="flex items-center justify-center md:justify-start gap-2">
-                                <div className="h-2 w-2 rounded-full bg-red-600 animate-pulse"></div>
-                                <p className="text-neutral-700 text-lg font-bold">
-                                    Director: <span className="text-black">{author || "Autor detectado"}</span>
-                                </p>
-                            </div>
+                            <p className="text-neutral-700 text-sm font-bold">
+                                Director: <span className="text-black">{author}</span>
+                            </p>
                         </div>
                     </div>
                 )}
             </div>
 
-            {/* Estados de Carga y Resultados */}
+            {/* Carga */}
             {loading && (
-                <div className="flex flex-col items-center justify-center py-24 space-y-6">
-                    <div className="relative">
-                        <div className="absolute inset-0 bg-blue-500 blur-2xl opacity-20 animate-pulse"></div>
-                        <Brain size={80} className="text-white relative animate-bounce" />
-                    </div>
-                    <div className="text-center space-y-2">
-                        <p className="text-white font-black text-2xl tracking-tight uppercase">Analizando Estructura Narrativa</p>
-                        <p className="text-amber-500 font-bold text-sm tracking-[0.3em] uppercase animate-pulse">Comparando con base de datos histórica...</p>
+                <div className="flex flex-col items-center justify-center py-20 space-y-4">
+                    <Brain size={60} className="text-white animate-bounce" />
+                    <div className="text-center">
+                        <p className="text-white font-black text-xl uppercase">Analizando Estructura</p>
+                        <p className="text-amber-500 font-bold text-xs uppercase animate-pulse">Consultando histórico...</p>
                     </div>
                 </div>
             )}
 
             {results && !loading && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-8 duration-1000">
                     {results.map((rec, i) => (
                         <div
                             key={rec.festivalId}
-                            className="bg-neutral-900 border-2 border-neutral-800 rounded-3xl p-8 space-y-6 hover:border-amber-500/50 transition-all group relative overflow-hidden flex flex-col"
+                            className="bg-neutral-900 border-2 border-neutral-800 rounded-2xl p-6 space-y-5 hover:border-amber-500 transition-all group flex flex-col"
                         >
                             <div className="flex justify-between items-start">
-                                <div className="h-12 w-12 bg-white text-black rounded-xl flex items-center justify-center text-2xl font-black shadow-xl group-hover:bg-amber-500 transition-colors">
+                                <div className="h-10 w-10 bg-white text-black rounded-lg flex items-center justify-center text-xl font-black">
                                     {i + 1}
                                 </div>
                                 <div className="text-right">
-                                    <div className="text-4xl font-black text-white">{rec.affinityScore}%</div>
-                                    <div className="text-[10px] text-amber-500 font-black uppercase tracking-widest">Afinidad</div>
+                                    <div className="text-3xl font-black text-white">{rec.affinityScore}%</div>
+                                    <div className="text-[9px] text-amber-500 font-black uppercase tracking-widest">Afinidad</div>
                                 </div>
                             </div>
 
-                            <div className="space-y-3">
-                                <h3 className="text-2xl font-black text-white leading-[1.1]">
+                            <div className="space-y-2">
+                                <h3 className="text-xl font-black text-white leading-tight">
                                     {rec.festivalName}
                                 </h3>
-                                <div className="inline-flex items-center gap-2 px-3 py-1 bg-neutral-800 border border-neutral-700 rounded-lg text-amber-400 text-xs font-bold uppercase tracking-wider">
-                                    Línea: {rec.matchingWinner?.theme}
+                                <div className="inline-flex items-center px-2 py-0.5 bg-neutral-800 border border-neutral-700 rounded text-amber-400 text-[10px] font-bold uppercase tracking-wider">
+                                    DNA: {rec.matchingWinner?.theme}
                                 </div>
                             </div>
 
                             <div className="flex-1">
-                                <p className="text-white text-lg font-medium leading-relaxed italic border-l-4 border-amber-500 pl-4 py-1">
+                                <p className="text-white/90 text-[13px] font-medium leading-relaxed italic border-l-2 border-amber-500 pl-3">
                                     "{rec.technicalReasoning}"
                                 </p>
                             </div>
 
-                            <div className="pt-6 border-t border-neutral-800 space-y-3">
+                            <div className="pt-4 border-t border-neutral-800 space-y-2">
                                 <div className="flex items-center gap-2 text-white">
-                                    <div className="p-1 bg-amber-500 rounded">
-                                        <AlertTriangle size={14} className="text-black" />
-                                    </div>
-                                    <span className="text-xs font-black uppercase tracking-widest">Ajuste Sugerido</span>
+                                    <AlertTriangle size={12} className="text-amber-500" />
+                                    <span className="text-[10px] font-black uppercase tracking-widest">Observación</span>
                                 </div>
-                                <p className="text-neutral-300 text-sm font-medium leading-relaxed bg-neutral-800/50 p-3 rounded-xl">
+                                <p className="text-neutral-400 text-[11px] font-medium leading-snug">
                                     {rec.weaknesses}
                                 </p>
                             </div>

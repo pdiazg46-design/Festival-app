@@ -49,6 +49,7 @@ export default function YouTubeRecommender() {
             console.error("Error analyzing link:", error);
         } finally {
             setLoading(false);
+            setUrl(""); // Limpiamos el input después de analizar
         }
     };
 

@@ -76,19 +76,21 @@ export default function StudioPage() {
             // Helper to clean technical headers for narrative use
             const cleanNarrativeText = (text: string) => {
                 if (!text) return "";
-                // Remove scene headings like "ESC 1 / EXT. LOC - DAY"
-                // Match common header patterns: (ESC|SCENE) X / (INT|EXT) or just (INT|EXT)
-                let clean = text.replace(/(?:ESC|ESCENA|SCENE)\s*\d+(\s*[\/\-]?\s*(?:INT|EXT|INT\/EXT)\.?\s*[\w\s\.]+)?(?:-)?\s*(?:DÍA|NOCHE|DAY|NIGHT)?/gi, " ");
+                // 1. Remove standard scene headings (ESC 1 / INT. LOC - DAY)
+                let clean = text.replace(/(?:ESC|ESCENA|SCENE)\s*\d+(?:[\s\/\-\.]+(?:INT|EXT|INTERIOR|EXTERIOR|INT\/EXT)[\w\s\.\-\/]+)?(?:DÍA|NOCHE|DAY|NIGHT)?/gi, " ");
 
-                // Also remove standalone INT/EXT if missed
-                clean = clean.replace(/\b(?:INT\.|EXT\.|INT\/EXT)\s+[\w\s\.]+(?:-)?\s*(?:DÍA|NOCHE|DAY|NIGHT)?/gi, " ");
+                // 2. Remove explicit full-word headers even without scene numbers (INTERIOR CASA / - )
+                // Looks for start of string or new sentence + INTERIOR/EXTERIOR + Uppercase words/Slashes + optional hyphen
+                clean = clean.replace(/\b(?:INT\.|EXT\.|INTERIOR|EXTERIOR)\s+[A-ZÁÉÍÓÚÑ\s\/\-\.]+(?:-|–)?/g, " ");
 
-                // Remove isolated technical words that might remain
-                clean = clean.replace(/\b(INT\.|EXT\.|DÍA|NOCHE|DAY|NIGHT)\b/gi, " ");
+                // 3. Remove isolated technical words and leftovers
+                clean = clean.replace(/\b(INT\.|EXT\.|DÍA|NOCHE|DAY|NIGHT|CASA|HABITACIÓN)\b/gi, " ");
 
-                // Cleanup extra spaces and punctuation at start
-                clean = clean.replace(/^\s*[\-\/\.]+\s*/, "").replace(/\s+/g, " ").trim();
-                return clean;
+                // 4. Cleanup trailing/leading punctuation/spaces left behind (e.g. "/ - Escuchamos")
+                clean = clean.replace(/^[\s\/\-\.\,]+|[\s\/\-\.\,]+$/g, "").trim();
+
+                // 5. Ensure first letter is capitalized after cleaning
+                return clean.charAt(0).toUpperCase() + clean.slice(1);
             };
 
             // Scene extraction logic: Look for ESC or SCENE patterns

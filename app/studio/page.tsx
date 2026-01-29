@@ -515,17 +515,17 @@ export default function StudioPage() {
             doc.setFontSize(24);
             doc.setFont("helvetica", "bold");
             doc.setTextColor(0);
-            doc.text(generatedConcept.title, 5, 24);
+            doc.text(generatedConcept.title, 5, 40); // Moved down significantly to clear logo
 
             // Logline
             doc.setFontSize(10);
             doc.setFont("helvetica", "italic");
             doc.setTextColor(80);
             const splitLogline = doc.splitTextToSize(generatedConcept.logline, pageWidth - 10);
-            doc.text(splitLogline, 5, 30);
+            doc.text(splitLogline, 5, 50);
 
             // Director's Note
-            let currentY = 30 + (splitLogline.length * 4) + 4;
+            let currentY = 50 + (splitLogline.length * 4) + 4;
             if (advisorNote) {
                 doc.setFontSize(8);
                 doc.setFont("helvetica", "normal");

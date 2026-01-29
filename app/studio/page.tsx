@@ -52,9 +52,10 @@ export default function StudioPage() {
     // Granular Controls State
     const [pacing, setPacing] = useState(50); // 0 (Slow) to 100 (Fast)
     const [contrast, setContrast] = useState(50); // 0 (Natural) to 100 (Stylized)
+    const [sceneCount, setSceneCount] = useState(3); // Default to 3 scenes
 
     // Base Script Data Enhanced (Full Story Evolution)
-    const getDetailedScript = (isEsp: boolean, vision: string, pacingVal: number, contrastVal: number) => {
+    const getDetailedScript = (isEsp: boolean, vision: string, pacingVal: number, contrastVal: number, scCount: number) => {
         const paceNote = pacingVal < 40 ? (isEsp ? "Toma larga, estática" : "Long take, static") : pacingVal > 70 ? (isEsp ? "Corte rápido, nervioso" : "Quick cut, nervous") : (isEsp ? "Giro suave" : "Smooth pan");
         const lightNote = contrastVal > 60 ? (isEsp ? "Clarioscuro fuerte, sombras duras" : "High contrast, hard shadows") : (isEsp ? "Luz suave, naturalista" : "Soft, natural light");
 
@@ -123,14 +124,31 @@ export default function StudioPage() {
                     { time: "8-10 min", title: isEsp ? "Desenlace" : "Resolution", desc: act3 }
                 ],
 
-                // DETAILED TECHNICAL SCRIPT (SHOT LIST)
-                shotList: [
-                    { id: "1", scene: "1", time: "00:00", type: "ESTABLISHING / WIDE", lens: "24mm", subject: isEsp ? `ENTORNO: ${act1.substring(0, 40)}...` : `SETTING: ${act1.substring(0, 40)}...`, description_detail: "", audio: isEsp ? "Ambiente inmersivo (Viento/Tráfico/Silencio)" : "Immersive ambience (Wind/Traffic/Silence)", props: "", detail_shot: "", actors: "", note: `${lightNote}. ${isEsp ? "Estableciendo contexto." : "Establishing context."}` },
-                    { id: "2", scene: "1", time: "00:20", type: "DETAIL / INSERT", lens: "100mm", subject: isEsp ? "Objeto clave o rasgo del protagonista" : "Key object or protagonist feature", description_detail: "", audio: isEsp ? "Sonido puntual enfatizado" : "Emphasized specific sound", props: "", detail_shot: isEsp ? "Primer plano del objeto" : "Close up of object", actors: "", note: `${paceNote}.` },
-                    { id: "3", scene: "1", time: "00:45", type: "MEDIUM SHOT", lens: "50mm", subject: act1, description_detail: "", audio: isEsp ? "Respiración / Pasos / Acciones" : "Breathing / Steps / Actions", props: "", detail_shot: "", actors: "", note: isEsp ? "Centrado en la acción principal." : "Centered on main action." },
-                    { id: "4", scene: "2", time: "01:10", type: "OTS / REACTION", lens: "35mm", subject: act2, description_detail: "", audio: isEsp ? "Diálogo o sonido reactivo" : "Dialogue or reactive sound", props: "", detail_shot: "", actors: "", note: isEsp ? "Conectando personajes/elementos." : "Connecting characters/elements." },
-                    { id: "5", scene: "2", time: "01:40", type: "CLOSE UP", lens: "85mm", subject: act3, description_detail: "", audio: isEsp ? "Cresecendo o Silencio Súbito" : "Crescendo or Sudden Silence", props: "", detail_shot: "", actors: "", note: `${lightNote}. ${isEsp ? "Impacto emocional final." : "Final emotional impact."}` }
-                ]
+                // DETAILED TECHNICAL SCRIPT (SHOT LIST) - Generating based on sceneCount
+                shotList: Array.from({ length: scCount * 3 }).map((_, i) => {
+                    const sceneNum = Math.floor(i / 3) + 1;
+                    const shotNumInSc = (i % 3) + 1;
+                    const timeSecs = i * 20;
+                    const timeStr = `${Math.floor(timeSecs / 60).toString().padStart(2, '0')}:${(timeSecs % 60).toString().padStart(2, '0')}`;
+
+                    const types = ["WIDE", "MEDIUM", "CLOSE UP", "DETAIL", "OTS"];
+                    const lenses = ["24mm", "35mm", "50mm", "85mm", "100mm"];
+
+                    return {
+                        id: (i + 1).toString(),
+                        scene: sceneNum.toString(),
+                        time: timeStr,
+                        type: types[i % types.length],
+                        lens: lenses[i % lenses.length],
+                        subject: isEsp ? `Acción en Escena ${sceneNum} - Plano ${shotNumInSc}` : `Action in Scene ${sceneNum} - Shot ${shotNumInSc}`,
+                        description_detail: "",
+                        audio: isEsp ? "Diseño sonoro sugerido" : "Suggested sound design",
+                        props: "",
+                        detail_shot: "",
+                        actors: "",
+                        note: `${lightNote}. ${paceNote}.`
+                    };
+                })
             };
         }
 
@@ -165,8 +183,11 @@ export default function StudioPage() {
     const [generatedConcept, setGeneratedConcept] = useState<null | { title: string, logline: string, ref: string, escaleta?: any[], shotList?: any[], isCustom?: boolean, suggestedEnding?: { title: string, desc: string } }>(null);
 
     const handleGenerate = () => {
+        if (customVision.length < 5) return;
+        setIsPremium(true);
         const isEsp = language !== 'en';
-        setGeneratedConcept(getDetailedScript(isEsp, customVision, pacing, contrast) as any);
+        const newScript = getDetailedScript(isEsp, customVision, pacing, contrast, sceneCount) as any;
+        setGeneratedConcept(newScript);
         setActiveTab("concept"); // Reset to Concept to show the storage evolution first
         setRefinementStep(0);
         setAdvisorNote(isEsp
@@ -439,6 +460,23 @@ export default function StudioPage() {
                                 placeholder={language === 'en' ? "E.g. Psychological horror about phone addiction..." : "Ej. Terror psicológico sobre adicción al celular..."}
                                 className="w-full h-24 bg-neutral-950 border border-neutral-700 rounded-lg p-3 text-sm focus:border-amber-500 outline-none resize-none placeholder:text-neutral-600 mb-4"
                             />
+
+                            {/* Scene Count Selector */}
+                            <div className="space-y-3 mb-6">
+                                <label className="text-xs text-neutral-400 uppercase font-bold flex justify-between">
+                                    <span>{language === 'en' ? 'Scenes' : 'Escenas'}</span>
+                                    <span className="text-amber-500">{sceneCount}</span>
+                                </label>
+                                <input
+                                    type="range" min="1" max="15" value={sceneCount}
+                                    onChange={(e) => setSceneCount(parseInt(e.target.value))}
+                                    className="w-full h-1.5 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-amber-500"
+                                />
+                                <p className="text-[10px] text-neutral-500 italic">
+                                    {language === 'en' ? 'Determines the number of AI-generated scenes.' : 'Determina el número de escenas generadas por la IA.'}
+                                </p>
+                            </div>
+
                             <button
                                 onClick={handleGenerate}
                                 className="w-full py-3 bg-gradient-to-r from-amber-500 to-yellow-600 rounded-lg font-bold text-neutral-950 transition-all hover:shadow-[0_0_15px_rgba(245,158,11,0.3)] text-sm"

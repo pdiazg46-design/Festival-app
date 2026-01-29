@@ -9,10 +9,6 @@ import UpgradeModal from "../components/UpgradeModal";
 import { Lock } from "lucide-react";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 import { cn } from "../lib/utils";
-import * as pdfjsLib from 'pdfjs-dist';
-
-// Configure PDF.js worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
 export default function StudioPage() {
     const { language, t } = useLanguage();
@@ -232,8 +228,13 @@ export default function StudioPage() {
     const extractTextFromPDF = async (file: File) => {
         setIsProcessing(true);
         try {
+            // Dynamic import for client-side processing
+            const pdfjsLib = await import('pdfjs-dist');
+            pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+
             const arrayBuffer = await file.arrayBuffer();
-            const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+            const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+            const pdf = await loadingTask.promise;
             let fullText = "";
 
             for (let i = 1; i <= pdf.numPages; i++) {

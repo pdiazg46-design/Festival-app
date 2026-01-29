@@ -9,6 +9,10 @@ import UpgradeModal from "../components/UpgradeModal";
 import { Lock } from "lucide-react";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 import { cn } from "../lib/utils";
+import * as pdfjsLib from 'pdfjs-dist';
+
+// Configure PDF.js worker
+pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
 export default function StudioPage() {
     const { language, t } = useLanguage();
@@ -222,6 +226,44 @@ export default function StudioPage() {
 
     // Shot List Editing State
     const [editingShotIndex, setEditingShotIndex] = useState<number | null>(null);
+    const [isDragging, setIsDragging] = useState(false);
+    const [isProcessing, setIsProcessing] = useState(false);
+
+    const extractTextFromPDF = async (file: File) => {
+        setIsProcessing(true);
+        try {
+            const arrayBuffer = await file.arrayBuffer();
+            const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+            let fullText = "";
+
+            for (let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i);
+                const textContent = await page.getTextContent();
+                const pageText = textContent.items.map((item: any) => item.str).join(" ");
+                fullText += pageText + "\n\n";
+            }
+
+            setScriptText(fullText);
+            setAdvisorNote(language === 'en' ? "PDF processed successfully! Review your script." : "¡PDF procesado con éxito! Revisa tu guión.");
+        } catch (err) {
+            console.error("Error parsing PDF:", err);
+            setAdvisorNote(language === 'en' ? "Error reading PDF. Try pasting the text manually." : "Error al leer el PDF. Intenta pegar el texto manualmente.");
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+
+    const handleDrop = async (e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDragging(false);
+        const file = e.dataTransfer.files[0];
+        if (file && file.type === "application/pdf") {
+            await extractTextFromPDF(file);
+        } else if (file && file.type === "text/plain") {
+            const text = await file.text();
+            setScriptText(text);
+        }
+    };
 
     // Shot Actions
     const handleAddShot = () => {
@@ -456,13 +498,53 @@ export default function StudioPage() {
                         <section className="bg-neutral-900/50 p-6 rounded-xl border border-neutral-800">
                             <h2 className="text-sm font-semibold mb-2 flex items-center gap-2 text-neutral-400 uppercase tracking-wider">
                                 {language === 'en' ? 'Screenplay' : 'Guión'}
+                                {isProcessing && <div className="ml-auto animate-spin h-3 w-3 border-2 border-amber-500 border-t-transparent rounded-full" />}
                             </h2>
-                            <textarea
-                                value={scriptText}
-                                onChange={(e) => setScriptText(e.target.value)}
-                                placeholder={language === 'en' ? "Paste your full screenplay here (e.g. ESC 1 / EXT / CAR - NIGHT...)" : "Pega tu guion completo aquí (ej. ESC 1 / EXT / AUTO - NOCHE...)"}
-                                className="w-full h-24 bg-neutral-950 border border-neutral-700 rounded-lg p-3 text-sm text-neutral-100 focus:border-amber-500 outline-none resize-none placeholder:text-neutral-500 mb-4"
-                            />
+
+                            <div
+                                onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                                onDragLeave={() => setIsDragging(false)}
+                                onDrop={handleDrop}
+                                className={cn(
+                                    "relative group transition-all duration-300 mb-4",
+                                    isDragging ? "scale-[1.02]" : ""
+                                )}
+                            >
+                                <textarea
+                                    value={scriptText}
+                                    onChange={(e) => setScriptText(e.target.value)}
+                                    placeholder={language === 'en' ? "Paste or Drop PDF screenplay..." : "Pega o Arrastra tu guión PDF..."}
+                                    className={cn(
+                                        "w-full h-32 bg-neutral-950 border rounded-lg p-3 text-sm text-neutral-100 focus:border-amber-500 outline-none resize-none placeholder:text-neutral-500 transition-colors",
+                                        isDragging ? "border-amber-500 bg-amber-500/10 shadow-[0_0_20px_rgba(245,158,11,0.2)]" : "border-neutral-700"
+                                    )}
+                                />
+
+                                {/* File Picker Trigger */}
+                                <label className="absolute bottom-2 right-2 p-1.5 bg-neutral-900 border border-neutral-800 rounded-md cursor-pointer hover:bg-neutral-800 transition-colors text-neutral-400 hover:text-amber-500 group-hover:border-neutral-700 shadow-lg">
+                                    <input
+                                        type="file"
+                                        className="hidden"
+                                        accept=".pdf,.txt"
+                                        onChange={async (e) => {
+                                            const file = e.target.files?.[0];
+                                            if (file) {
+                                                if (file.type === "application/pdf") await extractTextFromPDF(file);
+                                                else setScriptText(await file.text());
+                                            }
+                                        }}
+                                    />
+                                    <Edit2 size={12} />
+                                </label>
+
+                                {isDragging && (
+                                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none bg-amber-500/5 backdrop-blur-[1px] rounded-lg border-2 border-dashed border-amber-500">
+                                        <div className="bg-amber-500 text-black px-4 py-2 rounded-full text-xs font-black animate-bounce shadow-xl uppercase tracking-tighter">
+                                            {language === 'en' ? 'Drop PDF Here' : 'Suelta el PDF aquí'}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
 
                             <div className="space-y-3 mb-6 bg-amber-500/5 p-4 rounded-lg border border-amber-500/10">
                                 <h3 className="text-[10px] font-black uppercase text-amber-500/60 tracking-tighter">

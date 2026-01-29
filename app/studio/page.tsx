@@ -427,11 +427,11 @@ export default function StudioPage() {
                     {/* Left Column: Controls */}
                     <div className="lg:col-span-3 space-y-6">
 
-                        {/* Visión Input */}
+                        {/* Sinopsis Input */}
                         <section className="bg-neutral-900/50 p-6 rounded-xl border border-neutral-800">
                             <h2 className="text-sm font-semibold mb-2 flex items-center gap-2 text-neutral-400 uppercase tracking-wider">
                                 <Sparkles size={14} />
-                                {language === 'en' ? 'Vision' : 'Visión'}
+                                {language === 'en' ? 'Synopsis' : 'Sinopsis'}
                             </h2>
                             <textarea
                                 value={customVision}

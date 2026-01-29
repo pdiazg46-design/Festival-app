@@ -125,11 +125,11 @@ export default function StudioPage() {
 
                 // DETAILED TECHNICAL SCRIPT (SHOT LIST)
                 shotList: [
-                    { id: "1", time: "00:00", type: "ESTABLISHING / WIDE", lens: "24mm", subject: isEsp ? `ENTORNO: ${act1.substring(0, 40)}...` : `SETTING: ${act1.substring(0, 40)}...`, audio: isEsp ? "Ambiente inmersivo (Viento/Tráfico/Silencio)" : "Immersive ambience (Wind/Traffic/Silence)", note: `${lightNote}. ${isEsp ? "Estableciendo contexto." : "Establishing context."}` },
-                    { id: "2", time: "00:20", type: "DETAIL / INSERT", lens: "100mm", subject: isEsp ? "Objeto clave o rasgo del protagonista" : "Key object or protagonist feature", audio: isEsp ? "Sonido puntual enfatizado" : "Emphasized specific sound", note: `${paceNote}.` },
-                    { id: "3", time: "00:45", type: "MEDIUM SHOT", lens: "50mm", subject: act1, audio: isEsp ? "Respiración / Pasos / Acciones" : "Breathing / Steps / Actions", note: isEsp ? "Centrado en la acción principal." : "Centered on main action." },
-                    { id: "4", time: "01:10", type: "OTS / REACTION", lens: "35mm", subject: act2, audio: isEsp ? "Diálogo o sonido reactivo" : "Dialogue or reactive sound", note: isEsp ? "Conectando personajes/elementos." : "Connecting characters/elements." },
-                    { id: "5", time: "01:40", type: "CLOSE UP", lens: "85mm", subject: act3, audio: isEsp ? "Cresecendo o Silencio Súbito" : "Crescendo or Sudden Silence", note: `${lightNote}. ${isEsp ? "Impacto emocional final." : "Final emotional impact."}` }
+                    { id: "1", scene: "1", time: "00:00", type: "ESTABLISHING / WIDE", lens: "24mm", subject: isEsp ? `ENTORNO: ${act1.substring(0, 40)}...` : `SETTING: ${act1.substring(0, 40)}...`, description_detail: "", audio: isEsp ? "Ambiente inmersivo (Viento/Tráfico/Silencio)" : "Immersive ambience (Wind/Traffic/Silence)", props: "", detail_shot: "", actors: "", note: `${lightNote}. ${isEsp ? "Estableciendo contexto." : "Establishing context."}` },
+                    { id: "2", scene: "1", time: "00:20", type: "DETAIL / INSERT", lens: "100mm", subject: isEsp ? "Objeto clave o rasgo del protagonista" : "Key object or protagonist feature", description_detail: "", audio: isEsp ? "Sonido puntual enfatizado" : "Emphasized specific sound", props: "", detail_shot: isEsp ? "Primer plano del objeto" : "Close up of object", actors: "", note: `${paceNote}.` },
+                    { id: "3", scene: "1", time: "00:45", type: "MEDIUM SHOT", lens: "50mm", subject: act1, description_detail: "", audio: isEsp ? "Respiración / Pasos / Acciones" : "Breathing / Steps / Actions", props: "", detail_shot: "", actors: "", note: isEsp ? "Centrado en la acción principal." : "Centered on main action." },
+                    { id: "4", scene: "2", time: "01:10", type: "OTS / REACTION", lens: "35mm", subject: act2, description_detail: "", audio: isEsp ? "Diálogo o sonido reactivo" : "Dialogue or reactive sound", props: "", detail_shot: "", actors: "", note: isEsp ? "Conectando personajes/elementos." : "Connecting characters/elements." },
+                    { id: "5", scene: "2", time: "01:40", type: "CLOSE UP", lens: "85mm", subject: act3, description_detail: "", audio: isEsp ? "Cresecendo o Silencio Súbito" : "Crescendo or Sudden Silence", props: "", detail_shot: "", actors: "", note: `${lightNote}. ${isEsp ? "Impacto emocional final." : "Final emotional impact."}` }
                 ]
             };
         }
@@ -203,11 +203,16 @@ export default function StudioPage() {
         if (!generatedConcept) return;
         const newShot = {
             id: `${generatedConcept.shotList?.length ? generatedConcept.shotList.length + 1 : 1}`,
+            scene: "1",
             time: "00:00",
             type: "WIDE",
             lens: "35mm",
             subject: language === 'en' ? "New Shot Description..." : "Descripción del nuevo plano...",
+            description_detail: "",
             audio: language === 'en' ? "Audio notes..." : "Notas de audio...",
+            props: "",
+            detail_shot: "",
+            actors: "",
             note: language === 'en' ? "Director's note..." : "Nota del director..."
         };
         const updatedList = [...(generatedConcept.shotList || []), newShot];
@@ -237,7 +242,7 @@ export default function StudioPage() {
             const jsPDF = (await import('jspdf')).default;
             const autoTable = (await import('jspdf-autotable')).default;
 
-            const doc = new jsPDF();
+            const doc = new jsPDF({ orientation: 'l', unit: 'mm', format: 'a4' });
             const isEsp = language !== 'en';
 
             // Title
@@ -249,7 +254,7 @@ export default function StudioPage() {
             doc.setFontSize(12);
             doc.setFont("helvetica", "italic");
             doc.setTextColor(100);
-            const splitLogline = doc.splitTextToSize(generatedConcept.logline, 180);
+            const splitLogline = doc.splitTextToSize(generatedConcept.logline, 260); // Wider for landscape
             doc.text(splitLogline, 14, 30);
 
             // Director's Note / Context
@@ -262,33 +267,60 @@ export default function StudioPage() {
             doc.setFont("helvetica", "italic");
             doc.setTextColor(80);
             const noteText = advisorNote || (isEsp ? "Generado por Antigravity Studio." : "Generated by Antigravity Studio.");
-            const splitNote = doc.splitTextToSize(noteText, 180);
+            const splitNote = doc.splitTextToSize(noteText, 260); // Wider for landscape
             doc.text(splitNote, 14, currentY);
 
             // Table
             currentY += (splitNote.length * 4) + 10;
 
             const tableColumn = isEsp
-                ? ["ID", "Tiempo", "Tipo", "Lente", "Acción / Sujeto", "Audio", "Notas"]
-                : ["ID", "Time", "Type", "Lens", "Action / Subject", "Audio", "Notes"];
+                ? ["ID", "Esc", "Tiempo", "Encuadre", "Lente", "Acción", "Descripción Plano", "Sonido/EFX", "Utilería", "Detalle", "Actores", "Notas", "Storyboard / Boceto"]
+                : ["ID", "Sc", "Time", "Type", "Lens", "Action", "Description Shot", "Audio/SFX", "Props", "Detail", "Actors", "Notes", "Storyboard / Sketch"];
 
             const tableRows = generatedConcept.shotList.map(shot => [
                 shot.id,
+                shot.scene || "",
                 shot.time,
                 shot.type,
                 shot.lens,
                 shot.subject,
+                shot.description_detail || "",
                 shot.audio,
-                shot.note
+                shot.props || "",
+                shot.detail_shot || "",
+                shot.actors || "",
+                shot.note,
+                "" // Empty space for Storyboard drawing
             ]);
 
             autoTable(doc, {
                 startY: currentY,
                 head: [tableColumn],
                 body: tableRows,
-                styles: { fontSize: 8, cellPadding: 2 },
+                styles: {
+                    fontSize: 7,
+                    cellPadding: 2,
+                    minCellHeight: 35, // Space for drawing
+                    valign: 'middle'
+                },
+                columnStyles: {
+                    0: { cellWidth: 8 },  // ID
+                    1: { cellWidth: 8 },  // Esc
+                    2: { cellWidth: 15 }, // Time
+                    3: { cellWidth: 20 }, // Type
+                    4: { cellWidth: 12 }, // Lens
+                    5: { cellWidth: 30 }, // Action
+                    6: { cellWidth: 30 }, // Description
+                    7: { cellWidth: 20 }, // Audio
+                    8: { cellWidth: 15 }, // Props
+                    9: { cellWidth: 15 }, // Detail
+                    10: { cellWidth: 15 }, // Actors
+                    11: { cellWidth: 20 }, // Notes
+                    12: { cellWidth: 45 }  // Storyboard (Largest)
+                },
                 headStyles: { fillColor: [245, 158, 11] }, // Amber 500
-                alternateRowStyles: { fillColor: [245, 245, 245] }
+                alternateRowStyles: { fillColor: [250, 250, 250] },
+                margin: { left: 10, right: 10 }
             });
 
             doc.save("Script_Antigravity.pdf");
@@ -592,17 +624,25 @@ export default function StudioPage() {
                                                     {/* EDIT MODE */}
                                                     {editingShotIndex === index ? (
                                                         <div className="flex-1 space-y-4">
-                                                            <div className="flex gap-4">
-                                                                <div className="w-20 shrink-0">
-                                                                    <label className="text-[10px] uppercase text-neutral-500 font-bold mb-1 block">ID</label>
+                                                            <div className="flex flex-wrap gap-4">
+                                                                <div className="w-16 shrink-0">
+                                                                    <label className="text-[10px] uppercase text-neutral-500 font-bold mb-1 block">{language === 'en' ? 'ID' : 'ID'}</label>
                                                                     <input
                                                                         value={shot.id}
                                                                         onChange={(e) => handleUpdateShot(index, 'id', e.target.value)}
                                                                         className="w-full bg-neutral-950 border border-neutral-700 rounded px-2 py-1 text-sm font-bold text-white text-center"
                                                                     />
                                                                 </div>
+                                                                <div className="w-16 shrink-0">
+                                                                    <label className="text-[10px] uppercase text-neutral-500 font-bold mb-1 block">{language === 'en' ? 'Scene' : 'Escena'}</label>
+                                                                    <input
+                                                                        value={shot.scene}
+                                                                        onChange={(e) => handleUpdateShot(index, 'scene', e.target.value)}
+                                                                        className="w-full bg-neutral-950 border border-neutral-700 rounded px-2 py-1 text-sm font-bold text-amber-500 text-center"
+                                                                    />
+                                                                </div>
                                                                 <div className="w-24 shrink-0">
-                                                                    <label className="text-[10px] uppercase text-neutral-500 font-bold mb-1 block">Lens</label>
+                                                                    <label className="text-[10px] uppercase text-neutral-500 font-bold mb-1 block">{language === 'en' ? 'Lens' : 'Lente'}</label>
                                                                     <input
                                                                         value={shot.lens}
                                                                         onChange={(e) => handleUpdateShot(index, 'lens', e.target.value)}
@@ -610,7 +650,7 @@ export default function StudioPage() {
                                                                     />
                                                                 </div>
                                                                 <div className="w-32 shrink-0">
-                                                                    <label className="text-[10px] uppercase text-neutral-500 font-bold mb-1 block">Type</label>
+                                                                    <label className="text-[10px] uppercase text-neutral-500 font-bold mb-1 block">{language === 'en' ? 'Type' : 'Encuadre'}</label>
                                                                     <input
                                                                         value={shot.type}
                                                                         onChange={(e) => handleUpdateShot(index, 'type', e.target.value)}
@@ -618,7 +658,7 @@ export default function StudioPage() {
                                                                     />
                                                                 </div>
                                                                 <div className="w-24 shrink-0">
-                                                                    <label className="text-[10px] uppercase text-neutral-500 font-bold mb-1 block">Time</label>
+                                                                    <label className="text-[10px] uppercase text-neutral-500 font-bold mb-1 block">{language === 'en' ? 'Time' : 'Tiempo'}</label>
                                                                     <input
                                                                         value={shot.time}
                                                                         onChange={(e) => handleUpdateShot(index, 'time', e.target.value)}
@@ -627,18 +667,30 @@ export default function StudioPage() {
                                                                 </div>
                                                             </div>
 
-                                                            <div>
-                                                                <label className="text-[10px] uppercase text-neutral-500 font-bold mb-1 block">Subject / Action</label>
-                                                                <textarea
-                                                                    value={shot.subject}
-                                                                    onChange={(e) => handleUpdateShot(index, 'subject', e.target.value)}
-                                                                    className="w-full bg-neutral-950 border border-neutral-700 rounded px-3 py-2 text-sm text-white resize-none h-20 focus:border-amber-500 outline-none"
-                                                                />
+                                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                                <div>
+                                                                    <label className="text-[10px] uppercase text-neutral-500 font-bold mb-1 block">{language === 'en' ? 'Subject / Action' : 'Acción'}</label>
+                                                                    <textarea
+                                                                        value={shot.subject}
+                                                                        onChange={(e) => handleUpdateShot(index, 'subject', e.target.value)}
+                                                                        className="w-full bg-neutral-950 border border-neutral-700 rounded px-3 py-2 text-sm text-white resize-none h-20 focus:border-amber-500 outline-none"
+                                                                        placeholder={language === 'en' ? "What happens in this shot..." : "Qué sucede en este plano..."}
+                                                                    />
+                                                                </div>
+                                                                <div>
+                                                                    <label className="text-[10px] uppercase text-neutral-500 font-bold mb-1 block">{language === 'en' ? 'Shot Description' : 'Descripción plano'}</label>
+                                                                    <textarea
+                                                                        value={shot.description_detail}
+                                                                        onChange={(e) => handleUpdateShot(index, 'description_detail', e.target.value)}
+                                                                        className="w-full bg-neutral-950 border border-neutral-700 rounded px-3 py-2 text-sm text-white resize-none h-20 focus:border-amber-500 outline-none"
+                                                                        placeholder={language === 'en' ? "Visual composition, framing details..." : "Composición visual, detalles de encuadre..."}
+                                                                    />
+                                                                </div>
                                                             </div>
 
-                                                            <div className="grid grid-cols-2 gap-4">
+                                                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                                                 <div>
-                                                                    <label className="text-[10px] uppercase text-neutral-500 font-bold mb-1 block">Audio</label>
+                                                                    <label className="text-[10px] uppercase text-neutral-500 font-bold mb-1 block">{language === 'en' ? 'Audio / SFX' : 'Sonido/ Efectos'}</label>
                                                                     <input
                                                                         value={shot.audio}
                                                                         onChange={(e) => handleUpdateShot(index, 'audio', e.target.value)}
@@ -646,13 +698,38 @@ export default function StudioPage() {
                                                                     />
                                                                 </div>
                                                                 <div>
-                                                                    <label className="text-[10px] uppercase text-neutral-500 font-bold mb-1 block">Note</label>
+                                                                    <label className="text-[10px] uppercase text-neutral-500 font-bold mb-1 block">{language === 'en' ? 'Props' : 'Utilería'}</label>
                                                                     <input
-                                                                        value={shot.note}
-                                                                        onChange={(e) => handleUpdateShot(index, 'note', e.target.value)}
-                                                                        className="w-full bg-neutral-950 border border-neutral-700 rounded px-3 py-2 text-xs text-amber-200/70"
+                                                                        value={shot.props}
+                                                                        onChange={(e) => handleUpdateShot(index, 'props', e.target.value)}
+                                                                        className="w-full bg-neutral-950 border border-neutral-700 rounded px-3 py-2 text-xs text-neutral-300"
                                                                     />
                                                                 </div>
+                                                                <div>
+                                                                    <label className="text-[10px] uppercase text-neutral-500 font-bold mb-1 block">{language === 'en' ? 'Detail' : 'Detalle'}</label>
+                                                                    <input
+                                                                        value={shot.detail_shot}
+                                                                        onChange={(e) => handleUpdateShot(index, 'detail_shot', e.target.value)}
+                                                                        className="w-full bg-neutral-950 border border-neutral-700 rounded px-3 py-2 text-xs text-neutral-300"
+                                                                    />
+                                                                </div>
+                                                                <div>
+                                                                    <label className="text-[10px] uppercase text-neutral-500 font-bold mb-1 block">{language === 'en' ? 'Actors' : 'Actores'}</label>
+                                                                    <input
+                                                                        value={shot.actors}
+                                                                        onChange={(e) => handleUpdateShot(index, 'actors', e.target.value)}
+                                                                        className="w-full bg-neutral-950 border border-neutral-700 rounded px-3 py-2 text-xs text-neutral-300"
+                                                                    />
+                                                                </div>
+                                                            </div>
+
+                                                            <div>
+                                                                <label className="text-[10px] uppercase text-neutral-500 font-bold mb-1 block">{language === 'en' ? 'Director Note' : 'Nota del Director'}</label>
+                                                                <input
+                                                                    value={shot.note}
+                                                                    onChange={(e) => handleUpdateShot(index, 'note', e.target.value)}
+                                                                    className="w-full bg-neutral-950 border border-neutral-700 rounded px-3 py-2 text-xs text-amber-200/70"
+                                                                />
                                                             </div>
 
                                                             <div className="flex justify-end gap-2 pt-2">
@@ -675,21 +752,37 @@ export default function StudioPage() {
 
                                                             {/* Shot Details */}
                                                             <div className="flex-1 space-y-2">
-                                                                <div className="flex items-center gap-3 mb-1">
+                                                                <div className="flex flex-wrap items-center gap-3 mb-1">
+                                                                    <span className="text-amber-500 font-bold text-xs bg-amber-950/20 px-2 py-0.5 rounded border border-amber-900/40">SC {shot.scene || "1"}</span>
                                                                     <span className="text-emerald-400 font-bold tracking-wide text-sm uppercase bg-emerald-950/30 px-2 py-0.5 rounded border border-emerald-900/50">{shot.type}</span>
                                                                     <span className="text-neutral-500 text-xs font-mono">{shot.time}</span>
                                                                 </div>
-                                                                <h3 className="text-lg font-medium text-white leading-snug">{shot.subject}</h3>
+                                                                <h3 className="text-lg font-bold text-white leading-snug">{shot.subject}</h3>
+                                                                {shot.description_detail && (
+                                                                    <p className="text-sm text-neutral-400 mt-1 italic leading-relaxed">{shot.description_detail}</p>
+                                                                )}
 
-                                                                {/* Audio & Notes */}
-                                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3 pt-3 border-t border-neutral-800/50">
-                                                                    <div className="flex items-start gap-2 text-sm text-neutral-400">
-                                                                        <span className="text-neutral-600 uppercase font-bold text-xs mt-0.5">AUDIO:</span>
-                                                                        {shot.audio}
+                                                                {/* Audio, Props, Detail, Actors & Notes */}
+                                                                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3 pt-3 border-t border-neutral-800/50">
+                                                                    <div className="flex flex-col gap-1">
+                                                                        <span className="text-neutral-600 uppercase font-black text-[9px]">{language === 'en' ? 'AUDIO / SFX' : 'SONIDO/ EFECTOS'}:</span>
+                                                                        <span className="text-xs text-neutral-400">{shot.audio}</span>
                                                                     </div>
-                                                                    <div className="flex items-start gap-2 text-sm text-amber-200/70">
-                                                                        <span className="text-amber-500/50 uppercase font-bold text-xs mt-0.5">NOTE:</span>
-                                                                        {shot.note}
+                                                                    <div className="flex flex-col gap-1">
+                                                                        <span className="text-neutral-600 uppercase font-black text-[9px]">{language === 'en' ? 'PROPS' : 'UTILERÍA'}:</span>
+                                                                        <span className="text-xs text-neutral-400">{shot.props || "-"}</span>
+                                                                    </div>
+                                                                    <div className="flex flex-col gap-1">
+                                                                        <span className="text-neutral-600 uppercase font-black text-[9px]">{language === 'en' ? 'DETAIL' : 'DETALLE'}:</span>
+                                                                        <span className="text-xs text-indigo-400">{shot.detail_shot || "-"}</span>
+                                                                    </div>
+                                                                    <div className="flex flex-col gap-1">
+                                                                        <span className="text-neutral-600 uppercase font-black text-[9px]">{language === 'en' ? 'ACTORS' : 'ACTORES'}:</span>
+                                                                        <span className="text-xs text-emerald-400">{shot.actors || "-"}</span>
+                                                                    </div>
+                                                                    <div className="flex flex-col gap-1 md:col-span-2">
+                                                                        <span className="text-amber-500/50 uppercase font-black text-[9px]">{language === 'en' ? 'DIRECTOR NOTE' : 'NOTA DIRECTOR'}:</span>
+                                                                        <span className="text-xs text-amber-200/70">{shot.note}</span>
                                                                     </div>
                                                                 </div>
                                                             </div>

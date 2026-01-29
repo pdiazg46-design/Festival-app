@@ -73,14 +73,43 @@ export default function StudioPage() {
 
         // --- CUSTOM SCRIPT / VISION LOGIC ---
         if (hasVision) {
+            // Helper to clean technical headers for narrative use
+            const cleanNarrativeText = (text: string) => {
+                if (!text) return "";
+                // Remove scene headings like "ESC 1 / EXT. LOC - DAY"
+                // Match common header patterns: (ESC|SCENE) X / (INT|EXT) or just (INT|EXT)
+                let clean = text.replace(/(?:ESC|ESCENA|SCENE)\s*\d+(\s*[\/\-]?\s*(?:INT|EXT|INT\/EXT)\.?\s*[\w\s\.]+)?(?:-)?\s*(?:DÍA|NOCHE|DAY|NIGHT)?/gi, " ");
+
+                // Also remove standalone INT/EXT if missed
+                clean = clean.replace(/\b(?:INT\.|EXT\.|INT\/EXT)\s+[\w\s\.]+(?:-)?\s*(?:DÍA|NOCHE|DAY|NIGHT)?/gi, " ");
+
+                // Remove isolated technical words that might remain
+                clean = clean.replace(/\b(INT\.|EXT\.|DÍA|NOCHE|DAY|NIGHT)\b/gi, " ");
+
+                // Cleanup extra spaces and punctuation at start
+                clean = clean.replace(/^\s*[\-\/\.]+\s*/, "").replace(/\s+/g, " ").trim();
+                return clean;
+            };
+
             // Scene extraction logic: Look for ESC or SCENE patterns
             const sceneHeaders = inputContent.match(/(?:ESC|ESCENA|SCENE)\s*(\d+)/gi) || [];
             const detectedSceneCount = sceneHeaders.length > 0 ? sceneHeaders.length : scManualCount;
 
-            const snippets = inputContent.split('.').filter((s: string) => s.trim().length > 0);
-            const act1 = snippets[0] || (isEsp ? "Introducción del conflicto" : "Conflict intro");
-            const act2 = snippets[1] || (isEsp ? "Escalada de tensión" : "Tension escalation");
-            const act3 = snippets[2] || (isEsp ? "Clímax y resolución" : "Climax and resolution");
+            // Smart Snippet Extraction: Split by periods/newlines but filter out technical-only lines
+            const rawSnippets = inputContent.split(/[\.\n]+/).filter(s => s.trim().length > 0);
+            const validSnippets = rawSnippets.filter(s => {
+                const upper = s.toUpperCase().trim();
+                // Filter out short lines that look like headers
+                if (upper.length < 50 && (upper.includes("EXT.") || upper.includes("INT.") || upper.includes("ESC "))) return false;
+                return true;
+            });
+
+            // Use cleaned snippets or fallback to raw if too aggressive filtering
+            const effectiveSnippets = validSnippets.length > 0 ? validSnippets : rawSnippets;
+
+            const act1 = cleanNarrativeText(effectiveSnippets[0]) || (isEsp ? "Introducción del conflicto" : "Conflict intro");
+            const act2 = cleanNarrativeText(effectiveSnippets[1]) || (isEsp ? "Escalada de tensión" : "Tension escalation");
+            const act3 = cleanNarrativeText(effectiveSnippets[2]) || (isEsp ? "Clímax y resolución" : "Climax and resolution");
 
             // Analyze Tone/Genre for Ending Suggestion
             const lowerVision = inputContent.toLowerCase();
@@ -168,11 +197,14 @@ export default function StudioPage() {
 
             const fmt = formatTime;
 
+            // Clean content for Logline
+            const cleanedInputForLogline = cleanNarrativeText(inputContent);
+
             return {
                 title: detectedTitle,
                 logline: isEsp
-                    ? `Cuando un ${inputContent.toLowerCase().includes('mujer') ? 'mujer' : 'personaje'} se enfrenta a "${inputContent.substring(0, 50)}...", deberá luchar contra lo imposible para lograr su objetivo principal antes de que sea demasiado tarde.`
-                    : `When a ${inputContent.toLowerCase().includes('woman') ? 'woman' : 'character'} faces "${inputContent.substring(0, 50)}...", they must fight against the odds to achieve their goal before it's too late.`,
+                    ? `Cuando un ${cleanedInputForLogline.toLowerCase().includes('mujer') ? 'mujer' : 'personaje'} se enfrenta a "${cleanedInputForLogline.substring(0, 60)}...", deberá luchar contra lo imposible para lograr su objetivo principal antes de que sea demasiado tarde.`
+                    : `When a ${cleanedInputForLogline.toLowerCase().includes('woman') ? 'woman' : 'character'} faces "${cleanedInputForLogline.substring(0, 60)}...", they must fight against the odds to achieve their goal before it's too late.`,
                 ref: isEsp ? "Ref: Estilo visual adaptado al input del usuario." : "Ref: Visual style adapted to user input.",
 
                 // AI SUGGESTED ENDING

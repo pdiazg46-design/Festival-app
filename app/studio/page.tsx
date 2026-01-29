@@ -52,24 +52,31 @@ export default function StudioPage() {
     // Granular Controls State
     const [pacing, setPacing] = useState(50); // 0 (Slow) to 100 (Fast)
     const [contrast, setContrast] = useState(50); // 0 (Natural) to 100 (Stylized)
-    const [sceneCount, setSceneCount] = useState(3); // Default to 3 scenes
+    const [sceneCount, setSceneCount] = useState(3); // Manual scene count (fallback)
+    const [scriptText, setScriptText] = useState(""); // Full script content
+    const [duration, setDuration] = useState(10); // Duration in minutes
 
     // Base Script Data Enhanced (Full Story Evolution)
-    const getDetailedScript = (isEsp: boolean, vision: string, pacingVal: number, contrastVal: number, scCount: number) => {
+    const getDetailedScript = (isEsp: boolean, script: string, pacingVal: number, contrastVal: number, scManualCount: number) => {
         const paceNote = pacingVal < 40 ? (isEsp ? "Toma larga, estática" : "Long take, static") : pacingVal > 70 ? (isEsp ? "Corte rápido, nervioso" : "Quick cut, nervous") : (isEsp ? "Giro suave" : "Smooth pan");
         const lightNote = contrastVal > 60 ? (isEsp ? "Clarioscuro fuerte, sombras duras" : "High contrast, hard shadows") : (isEsp ? "Luz suave, naturalista" : "Soft, natural light");
 
-        const hasVision = vision && vision.trim().length > 0;
+        const inputContent = script || customVision;
+        const hasVision = inputContent && inputContent.trim().length > 0;
 
-        // --- CUSTOM VISION LOGIC ---
+        // --- CUSTOM SCRIPT / VISION LOGIC ---
         if (hasVision) {
-            const snippets = vision.split('.').filter(s => s.trim().length > 0);
+            // Scene extraction logic: Look for ESC or SCENE patterns
+            const sceneHeaders = inputContent.match(/(?:ESC|ESCENA|SCENE)\s*(\d+)/gi) || [];
+            const detectedSceneCount = sceneHeaders.length > 0 ? sceneHeaders.length : scManualCount;
+
+            const snippets = inputContent.split('.').filter((s: string) => s.trim().length > 0);
             const act1 = snippets[0] || (isEsp ? "Introducción del conflicto" : "Conflict intro");
             const act2 = snippets[1] || (isEsp ? "Escalada de tensión" : "Tension escalation");
             const act3 = snippets[2] || (isEsp ? "Clímax y resolución" : "Climax and resolution");
 
             // Analyze Tone/Genre for Ending Suggestion
-            const lowerVision = vision.toLowerCase();
+            const lowerVision = inputContent.toLowerCase();
             let endingProposal = { title: "", desc: "" };
 
             if (lowerVision.includes("miedo") || lowerVision.includes("asesino") || lowerVision.includes("oscur") || lowerVision.includes("horror") || lowerVision.includes("kill") || lowerVision.includes("dark")) {
@@ -103,14 +110,14 @@ export default function StudioPage() {
             }
 
             // Simple keyword extractor for title (mock)
-            const keywords = vision.split(' ').filter(w => w.length > 5);
+            const keywords = inputContent.split(' ').filter((w: string) => w.length > 5);
             const titleKeyword = keywords[0] ? keywords[0].toUpperCase() : (isEsp ? "PROYECTO NUEVO" : "NEW PROJECT");
 
             return {
                 title: isEsp ? `PROYECTO: ${titleKeyword}` : `PROJECT: ${titleKeyword}`,
                 logline: isEsp
-                    ? `Cuando un ${vision.toLowerCase().includes('mujer') ? 'mujer' : 'personaje'} se enfrenta a "${vision.substring(0, 50)}...", deberá luchar contra lo imposible para lograr su objetivo principal antes de que sea demasiado tarde.`
-                    : `When a ${vision.toLowerCase().includes('woman') ? 'woman' : 'character'} faces "${vision.substring(0, 50)}...", they must fight against the odds to achieve their goal before it's too late.`,
+                    ? `Cuando un ${inputContent.toLowerCase().includes('mujer') ? 'mujer' : 'personaje'} se enfrenta a "${inputContent.substring(0, 50)}...", deberá luchar contra lo imposible para lograr su objetivo principal antes de que sea demasiado tarde.`
+                    : `When a ${inputContent.toLowerCase().includes('woman') ? 'woman' : 'character'} faces "${inputContent.substring(0, 50)}...", they must fight against the odds to achieve their goal before it's too late.`,
                 ref: isEsp ? "Ref: Estilo visual adaptado al input del usuario." : "Ref: Visual style adapted to user input.",
 
                 // AI SUGGESTED ENDING
@@ -124,25 +131,22 @@ export default function StudioPage() {
                     { time: "8-10 min", title: isEsp ? "Desenlace" : "Resolution", desc: act3 }
                 ],
 
-                // DETAILED TECHNICAL SCRIPT (SHOT LIST) - Generating based on sceneCount
-                shotList: Array.from({ length: scCount * 3 }).map((_, i) => {
-                    const sceneNum = Math.floor(i / 3) + 1;
-                    const shotNumInSc = (i % 3) + 1;
-                    const timeSecs = i * 20;
-                    const timeStr = `${Math.floor(timeSecs / 60).toString().padStart(2, '0')}:${(timeSecs % 60).toString().padStart(2, '0')}`;
-
-                    const types = ["WIDE", "MEDIUM", "CLOSE UP", "DETAIL", "OTS"];
-                    const lenses = ["24mm", "35mm", "50mm", "85mm", "100mm"];
+                // DETAILED TECHNICAL SCRIPT (SHOT LIST) - One shot per detected scene as a starting point
+                shotList: Array.from({ length: detectedSceneCount }).map((_, i) => {
+                    const sceneNum = i + 1;
+                    const timePerSc = (duration * 60) / detectedSceneCount;
+                    const elapsed = i * timePerSc;
+                    const timeStr = `${Math.floor(elapsed / 60).toString().padStart(2, '0')}:${(Math.floor(elapsed % 60)).toString().padStart(2, '0')}`;
 
                     return {
                         id: (i + 1).toString(),
                         scene: sceneNum.toString(),
                         time: timeStr,
-                        type: types[i % types.length],
-                        lens: lenses[i % lenses.length],
-                        subject: isEsp ? `Acción en Escena ${sceneNum} - Plano ${shotNumInSc}` : `Action in Scene ${sceneNum} - Shot ${shotNumInSc}`,
-                        description_detail: "",
-                        audio: isEsp ? "Diseño sonoro sugerido" : "Suggested sound design",
+                        type: "MASTER SHOT",
+                        lens: "35mm",
+                        subject: isEsp ? `Apertura de Escena ${sceneNum}` : `Opening of Scene ${sceneNum}`,
+                        description_detail: isEsp ? "Plano general de situación basado en el guion." : "Master shot based on the script.",
+                        audio: isEsp ? "Ambiente sincronizado" : "Synchronized ambience",
                         props: "",
                         detail_shot: "",
                         actors: "",
@@ -162,10 +166,10 @@ export default function StudioPage() {
 
             // FULL STRUCTURE
             escaleta: [
-                { time: "0-2 min", title: isEsp ? "La Espera" : "The Wait", desc: isEsp ? "Lucas prepara la cena. Silencio absoluto." : "Lucas prepares dinner. Absolute silence." },
+                { time: "0-2 min", title: isEsp ? "La Espera" : "The Wait", desc: isEsp ? "Lucas prepara dinner. Absolute silence." : "Lucas prepares dinner. Absolute silence." },
                 { time: "2-4 min", title: isEsp ? "Conexión Perdida" : "Lost Connection", desc: isEsp ? "Madre entra. No habla. Solo responde por WhatsApp." : "Mother enters. Doesn't speak. Only answers via WhatsApp." },
                 { time: "4-7 min", title: isEsp ? "La Glitch" : "The Glitch", desc: isEsp ? "Lucas ve a través de su cámara que su madre sonríe falsamente." : "Lucas sees through his camera that his mother is smiling falsely." },
-                { time: "9-10 min", title: isEsp ? "Rendición" : "Surrender", desc: isEsp ? "Lucas acepta la simulación." : "Lucas accepts the simulation." }
+                { time: "9-10 min", title: isEsp ? "Rendición" : "Surrender", desc: isEsp ? "Lucas accepts the simulation." : "Lucas accepts the simulation." }
             ],
 
             // DETAILED TECHNICAL SCRIPT
@@ -183,9 +187,10 @@ export default function StudioPage() {
     const [generatedConcept, setGeneratedConcept] = useState<null | { title: string, logline: string, ref: string, escaleta?: any[], shotList?: any[], isCustom?: boolean, suggestedEnding?: { title: string, desc: string } }>(null);
 
     const handleGenerate = () => {
-        if (customVision.length < 5) return;
+        const finalInput = scriptText || customVision;
+        if (finalInput.length < 5) return;
         const isEsp = language !== 'en';
-        const newScript = getDetailedScript(isEsp, customVision, pacing, contrast, sceneCount) as any;
+        const newScript = getDetailedScript(isEsp, finalInput, pacing, contrast, sceneCount) as any;
         setGeneratedConcept(newScript);
         setActiveTab("concept"); // Reset to Concept to show the storage evolution first
         setRefinementStep(0);
@@ -204,7 +209,7 @@ export default function StudioPage() {
                 setActiveTab("shotlist");
             }
             const isEsp = language !== 'en';
-            setGeneratedConcept(getDetailedScript(isEsp, customVision, newPacing, newContrast, sceneCount) as any);
+            setGeneratedConcept(getDetailedScript(isEsp, scriptText, newPacing, newContrast, sceneCount) as any);
         }
     };
 
@@ -359,10 +364,10 @@ export default function StudioPage() {
             : `A young man tries to have dinner with his mother, but discovers she only responds via text messages. Physical reality decays.${vision ? ` (Idea: ${vision})` : ''}`,
         ref: "Ref: 'Black Mirror', 'Hereditary'.",
         escaleta: [
-            { time: "0-2 min", title: isEsp ? "La Espera" : "The Wait", desc: isEsp ? "Lucas prepara la cena. Silencio absoluto." : "Lucas prepares dinner. Absolute silence." },
+            { time: "0-2 min", title: isEsp ? "La Espera" : "The Wait", desc: isEsp ? "Lucas prepara dinner. Absolute silence." : "Lucas prepares dinner. Absolute silence." },
             { time: "2-4 min", title: isEsp ? "Conexión Perdida" : "Lost Connection", desc: isEsp ? "Madre entra. No habla. Solo responde por WhatsApp." : "Mother enters. Doesn't speak. Only answers via WhatsApp." },
             { time: "4-7 min", title: isEsp ? "La Glitch" : "The Glitch", desc: isEsp ? "Lucas ve a través de su cámara que su madre sonríe falsamente." : "Lucas sees through his camera that his mother is smiling falsely." },
-            { time: "9-10 min", title: isEsp ? "Rendición" : "Surrender", desc: isEsp ? "Lucas acepta la simulación." : "Lucas accepts the simulation." }
+            { time: "9-10 min", title: isEsp ? "Rendición" : "Surrender", desc: isEsp ? "Lucas accepts the simulation." : "Lucas accepts the simulation." }
         ],
         shotList: [
             { id: 1, type: isEsp ? "Detalle" : "Detail", subject: isEsp ? "Vapor de la sopa" : "Soup Steam", note: isEsp ? "Audio ASMR" : "ASMR Audio" },
@@ -454,11 +459,39 @@ export default function StudioPage() {
                                 {language === 'en' ? 'Synopsis' : 'Sinopsis'}
                             </h2>
                             <textarea
-                                value={customVision}
-                                onChange={(e) => setCustomVision(e.target.value)}
-                                placeholder={language === 'en' ? "E.g. Psychological horror about phone addiction..." : "Ej. Terror psicológico sobre adicción al celular..."}
+                                value={scriptText}
+                                onChange={(e) => setScriptText(e.target.value)}
+                                placeholder={language === 'en' ? "Paste your full screenplay here (e.g. ESC 1 / EXT / CAR - NIGHT...)" : "Pega tu guion completo aquí (ej. ESC 1 / EXT / AUTO - NOCHE...)"}
                                 className="w-full h-24 bg-neutral-950 border border-neutral-700 rounded-lg p-3 text-sm focus:border-amber-500 outline-none resize-none placeholder:text-neutral-600 mb-4"
                             />
+
+                            <div className="space-y-3 mb-6 bg-amber-500/5 p-4 rounded-lg border border-amber-500/10">
+                                <h3 className="text-[10px] font-black uppercase text-amber-500/60 tracking-tighter">
+                                    {language === 'en' ? 'Quick Plot Idea (Optional)' : 'Idea Rápida / Sinopsis (Opcional)'}
+                                </h3>
+                                <textarea
+                                    value={customVision}
+                                    onChange={(e) => setCustomVision(e.target.value)}
+                                    placeholder={language === 'en' ? "Short summary if no script provided..." : "Resumen corto si no tienes el guion..."}
+                                    className="w-full h-16 bg-transparent border-none p-0 text-xs focus:ring-0 outline-none resize-none placeholder:text-neutral-700"
+                                />
+                            </div>
+
+                            {/* Duration Selector */}
+                            <div className="space-y-3 mb-6">
+                                <label className="text-xs text-neutral-400 uppercase font-bold flex justify-between">
+                                    <span>{language === 'en' ? 'Target Duration' : 'Duración Estimada'}</span>
+                                    <span className="text-amber-500">{duration} min</span>
+                                </label>
+                                <input
+                                    type="range" min="1" max="210" value={duration}
+                                    onChange={(e) => setDuration(parseInt(e.target.value))}
+                                    className="w-full h-1.5 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-amber-500"
+                                />
+                                <p className="text-[10px] text-neutral-500 italic">
+                                    {language === 'en' ? 'From short films (7s) to features (210m).' : 'Desde cortos (7s) hasta largometrajes (210m).'}
+                                </p>
+                            </div>
 
                             {/* Scene Count Selector */}
                             <div className="space-y-3 mb-6">

@@ -465,8 +465,8 @@ export default function StudioPage() {
             currentY += (splitNote.length * 4) + 10;
 
             const tableColumn = isEsp
-                ? ["ID", "Esc", "Tiempo", "Encuadre", "Lente", "Acción", "Descripción Plano", "Sonido/EFX", "Utilería", "Detalle", "Actores", "Notas", "Storyboard / Boceto"]
-                : ["ID", "Sc", "Time", "Type", "Lens", "Action", "Description Shot", "Audio/SFX", "Props", "Detail", "Actors", "Notes", "Storyboard / Sketch"];
+                ? ["N° Plano", "Esc", "Tiempo", "Encuadre", "Lente", "Acción", "Descripción Plano", "Sonido/EFX", "Utilería", "Detalle", "Actores", "Notas", "Storyboard / Boceto"]
+                : ["Shot N°", "Sc", "Time", "Type", "Lens", "Action", "Description Shot", "Audio/SFX", "Props", "Detail", "Actors", "Notes", "Storyboard / Sketch"];
 
             const tableRows = generatedConcept.shotList.map(shot => [
                 shot.id,
@@ -489,29 +489,31 @@ export default function StudioPage() {
                 head: [tableColumn],
                 body: tableRows,
                 styles: {
-                    fontSize: 7,
-                    cellPadding: 2,
+                    fontSize: 6.5, // Slightly smaller to fit more comfortably
+                    cellPadding: 1.5,
                     minCellHeight: 35, // Space for drawing
-                    valign: 'middle'
+                    valign: 'middle',
+                    overflow: 'linebreak'
                 },
                 columnStyles: {
-                    0: { cellWidth: 8 },  // ID
+                    0: { cellWidth: 12 }, // N° Plano
                     1: { cellWidth: 8 },  // Esc
-                    2: { cellWidth: 15 }, // Time
-                    3: { cellWidth: 20 }, // Type
-                    4: { cellWidth: 12 }, // Lens
-                    5: { cellWidth: 30 }, // Action
-                    6: { cellWidth: 30 }, // Description
-                    7: { cellWidth: 20 }, // Audio
+                    2: { cellWidth: 12 }, // Time
+                    3: { cellWidth: 18 }, // Type
+                    4: { cellWidth: 10 }, // Lens
+                    5: { cellWidth: 32 }, // Action
+                    6: { cellWidth: 32 }, // Description
+                    7: { cellWidth: 18 }, // Audio
                     8: { cellWidth: 15 }, // Props
                     9: { cellWidth: 15 }, // Detail
                     10: { cellWidth: 15 }, // Actors
                     11: { cellWidth: 20 }, // Notes
-                    12: { cellWidth: 45 }  // Storyboard (Largest)
+                    12: { cellWidth: 45 }  // Storyboard
                 },
                 headStyles: { fillColor: [245, 158, 11] }, // Amber 500
                 alternateRowStyles: { fillColor: [250, 250, 250] },
-                margin: { left: 10, right: 10 }
+                margin: { left: 5, right: 5, top: 10, bottom: 10 },
+                tableWidth: 'auto'
             });
 
             doc.save("Script_Antigravity.pdf");

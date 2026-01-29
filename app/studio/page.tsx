@@ -228,9 +228,11 @@ export default function StudioPage() {
     const extractTextFromPDF = async (file: File) => {
         setIsProcessing(true);
         try {
-            // Dynamic import for client-side processing
-            const pdfjsLib = await import('pdfjs-dist');
-            pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+            // Dynamic import of the legacy build for better compatibility
+            const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf');
+
+            // Set worker using a reliable CDN that matches the installed version
+            pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`;
 
             const arrayBuffer = await file.arrayBuffer();
             const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
@@ -240,15 +242,23 @@ export default function StudioPage() {
             for (let i = 1; i <= pdf.numPages; i++) {
                 const page = await pdf.getPage(i);
                 const textContent = await page.getTextContent();
-                const pageText = textContent.items.map((item: any) => item.str).join(" ");
+                const pageText = textContent.items
+                    .map((item: any) => item.str)
+                    .join(" ");
                 fullText += pageText + "\n\n";
             }
 
+            if (fullText.trim().length === 0) {
+                throw new Error("Empty text extracted");
+            }
+
             setScriptText(fullText);
-            setAdvisorNote(language === 'en' ? "PDF processed successfully! Review your script." : "¡PDF procesado con éxito! Revisa tu guión.");
+            setAdvisorNote(language === 'en' ? "PDF processed successfully!" : "¡PDF procesado con éxito!");
         } catch (err) {
-            console.error("Error parsing PDF:", err);
-            setAdvisorNote(language === 'en' ? "Error reading PDF. Try pasting the text manually." : "Error al leer el PDF. Intenta pegar el texto manualmente.");
+            console.error("PDF Processing Error:", err);
+            setAdvisorNote(language === 'en'
+                ? "Could not read this PDF. Please copy and paste the text instead."
+                : "No pudimos leer este PDF. Por favor, copia y pega el texto directamente.");
         } finally {
             setIsProcessing(false);
         }

@@ -501,6 +501,29 @@ export default function StudioPage() {
         if (editingShotIndex === index) setEditingShotIndex(null);
     };
 
+    const handleImageUpload = async (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!generatedConcept || !generatedConcept.shotList || !e.target.files?.[0]) return;
+
+        const file = e.target.files[0];
+        const reader = new FileReader();
+
+        reader.onloadend = () => {
+            const base64String = reader.result as string;
+            const updatedList = [...generatedConcept.shotList];
+            updatedList[index] = { ...updatedList[index], storyboardImage: base64String };
+            setGeneratedConcept({ ...generatedConcept, shotList: updatedList });
+        };
+
+        reader.readAsDataURL(file);
+    };
+
+    const handleRemoveImage = (index: number) => {
+        if (!generatedConcept || !generatedConcept.shotList) return;
+        const updatedList = [...generatedConcept.shotList];
+        updatedList[index] = { ...updatedList[index], storyboardImage: undefined };
+        setGeneratedConcept({ ...generatedConcept, shotList: updatedList });
+    };
+
     // Handler for updating Structure (Escaleta)
     const handleUpdateEscaleta = (index: number, field: 'title' | 'desc', value: string) => {
         if (!generatedConcept || !generatedConcept.escaleta) return;
@@ -640,7 +663,31 @@ export default function StudioPage() {
                 },
                 alternateRowStyles: { fillColor: [248, 248, 248] },
                 margin: { left: 5, right: 5, top: 15, bottom: 5 },
-                tableWidth: 'auto'
+                tableWidth: 'auto',
+                didDrawCell: (data) => {
+                    // Check if we are in the Storyboard column (index 11) and it's the body section
+                    if (data.section === 'body' && data.column.index === 11) {
+                        const rowIndex = data.row.index;
+                        const shot = generatedConcept.shotList[rowIndex];
+
+                        if (shot && shot.storyboardImage) {
+                            try {
+                                // Calculate dimensions to fit in cell while maintaining aspect ratio
+                                // cell width is auto... roughly 100mm? Let's check dimensions of cell
+                                const cellWidth = data.cell.width;
+                                const cellHeight = data.cell.height;
+
+                                // Padding
+                                const padx = 2;
+                                const pady = 2;
+
+                                doc.addImage(shot.storyboardImage, 'JPEG', data.cell.x + padx, data.cell.y + pady, cellWidth - (padx * 2), cellHeight - (pady * 2));
+                            } catch (err) {
+                                // Fail silently if image is bad
+                            }
+                        }
+                    }
+                }
             });
 
             doc.save(`Script_${generatedConcept.title.replace(/[^a-z0-9]/gi, '_')}_AT-SIT.pdf`);
@@ -1151,6 +1198,40 @@ export default function StudioPage() {
                                                                     />
                                                                 </div>
                                                             </div>
+                                                            
+                                                            {/* STORYBOARD UPLOAD AREA */}
+                                                            <div className="mt-4 pt-4 border-t border-neutral-800">
+                                                                <h4 className="text-[10px] uppercase text-neutral-500 font-bold mb-2 flex items-center gap-2">
+                                                                    <Film size={12} />
+                                                                    Storyboard / Reference
+                                                                </h4>
+                                                                
+                                                                {shot.storyboardImage ? (
+                                                                    <div className="relative w-48 h-28 group/img overflow-hidden rounded-lg border border-neutral-700">
+                                                                        <img src={shot.storyboardImage} alt="Storyboard" className="w-full h-full object-cover" />
+                                                                        <button 
+                                                                            onClick={() => handleRemoveImage(index)}
+                                                                            className="absolute top-1 right-1 bg-red-500/80 hover:bg-red-600 text-white p-1 rounded-full opacity-0 group-hover/img:opacity-100 transition-opacity"
+                                                                        >
+                                                                            <Trash2 size={12} />
+                                                                        </button>
+                                                                    </div>
+                                                                ) : (
+                                                                    <div className="w-48">
+                                                                        <label className="flex flex-col items-center justify-center w-full h-28 border-2 border-neutral-800 border-dashed rounded-lg cursor-pointer bg-neutral-900/50 hover:bg-neutral-800 hover:border-amber-500/50 transition-all">
+                                                                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                                                                <FileDown size={20} className="text-neutral-500 mb-2" />
+                                                                                <p className="text-[10px] text-neutral-400 font-bold uppercase">{language === 'en' ? 'Upload Image' : 'Subir Imagen'}</p>
+                                                                            </div>
+                                                                            <input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(index, e)} />
+                                                                        </label>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+
+                                                        </div>
+                                                    ) : (
+                                                            </div>
 
                                                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                                                 <div>
@@ -1205,153 +1286,153 @@ export default function StudioPage() {
                                                                 </button>
                                                             </div>
                                                         </div>
-                                                    ) : (
-                                                        // VIEW MODE
-                                                        <>
-                                                            {/* ID & Lens */}
-                                                            <div className="flex flex-col items-center justify-center w-16 shrink-0 gap-2">
-                                                                <div className="text-2xl font-black text-neutral-700 group-hover:text-amber-500/50 transition-colors">{shot.id}</div>
-                                                                <div className="px-2 py-1 bg-neutral-950 rounded text-xs font-mono text-neutral-400 border border-neutral-800">{shot.lens}</div>
-                                                            </div>
+                                    ) : (
+                                    // VIEW MODE
+                                    <>
+                                        {/* ID & Lens */}
+                                        <div className="flex flex-col items-center justify-center w-16 shrink-0 gap-2">
+                                            <div className="text-2xl font-black text-neutral-700 group-hover:text-amber-500/50 transition-colors">{shot.id}</div>
+                                            <div className="px-2 py-1 bg-neutral-950 rounded text-xs font-mono text-neutral-400 border border-neutral-800">{shot.lens}</div>
+                                        </div>
 
-                                                            {/* Shot Details */}
-                                                            <div className="flex-1 space-y-2">
-                                                                <div className="flex flex-wrap items-center gap-3 mb-1">
-                                                                    <span className={cn(
-                                                                        "font-bold text-xs px-2 py-0.5 rounded border transition-all",
-                                                                        shot.type === 'MASTER SHOT'
-                                                                            ? "bg-amber-500 text-black border-amber-400 shadow-[0_0_10px_rgba(245,158,11,0.3)]"
-                                                                            : "text-amber-500 bg-amber-950/20 border-amber-900/40"
-                                                                    )}>
-                                                                        SC {shot.scene}
-                                                                    </span>
-                                                                    <span className="font-bold text-xs px-2 py-0.5 rounded border border-neutral-700 bg-neutral-800 text-neutral-300">
-                                                                        {language === 'en' ? 'SHOT' : 'PLANO'} {shot.id}
-                                                                    </span>
-                                                                    <span className={cn(
-                                                                        "font-bold tracking-wide text-sm uppercase px-2 py-0.5 rounded border",
-                                                                        shot.type === 'MASTER SHOT'
-                                                                            ? "bg-emerald-500 text-black border-emerald-400"
-                                                                            : "text-emerald-400 bg-emerald-950/30 border-emerald-900/50"
-                                                                    )}>
-                                                                        {shot.type}
-                                                                    </span>
-                                                                    <span className="text-neutral-500 text-xs font-mono">{shot.time}</span>
-                                                                </div>
-                                                                <h3 className="text-lg font-bold text-white leading-snug">{shot.subject}</h3>
-                                                                {shot.description_detail && (
-                                                                    <p className="text-sm text-neutral-400 mt-1 italic leading-relaxed">{shot.description_detail}</p>
-                                                                )}
+                                        {/* Shot Details */}
+                                        <div className="flex-1 space-y-2">
+                                            <div className="flex flex-wrap items-center gap-3 mb-1">
+                                                <span className={cn(
+                                                    "font-bold text-xs px-2 py-0.5 rounded border transition-all",
+                                                    shot.type === 'MASTER SHOT'
+                                                        ? "bg-amber-500 text-black border-amber-400 shadow-[0_0_10px_rgba(245,158,11,0.3)]"
+                                                        : "text-amber-500 bg-amber-950/20 border-amber-900/40"
+                                                )}>
+                                                    SC {shot.scene}
+                                                </span>
+                                                <span className="font-bold text-xs px-2 py-0.5 rounded border border-neutral-700 bg-neutral-800 text-neutral-300">
+                                                    {language === 'en' ? 'SHOT' : 'PLANO'} {shot.id}
+                                                </span>
+                                                <span className={cn(
+                                                    "font-bold tracking-wide text-sm uppercase px-2 py-0.5 rounded border",
+                                                    shot.type === 'MASTER SHOT'
+                                                        ? "bg-emerald-500 text-black border-emerald-400"
+                                                        : "text-emerald-400 bg-emerald-950/30 border-emerald-900/50"
+                                                )}>
+                                                    {shot.type}
+                                                </span>
+                                                <span className="text-neutral-500 text-xs font-mono">{shot.time}</span>
+                                            </div>
+                                            <h3 className="text-lg font-bold text-white leading-snug">{shot.subject}</h3>
+                                            {shot.description_detail && (
+                                                <p className="text-sm text-neutral-400 mt-1 italic leading-relaxed">{shot.description_detail}</p>
+                                            )}
 
-                                                                {/* Audio, Props, Detail, Actors & Notes */}
-                                                                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3 pt-3 border-t border-neutral-800/50">
-                                                                    <div className="flex flex-col gap-1">
-                                                                        <span className="text-neutral-600 uppercase font-black text-[9px]">{language === 'en' ? 'AUDIO / SFX' : 'SONIDO/ EFECTOS'}:</span>
-                                                                        <span className="text-xs text-neutral-400">{shot.audio}</span>
-                                                                    </div>
-                                                                    <div className="flex flex-col gap-1">
-                                                                        <span className="text-neutral-600 uppercase font-black text-[9px]">{language === 'en' ? 'DESCRIPTION' : 'DESCRIPCIÓN'}:</span>
-                                                                        <span className="text-xs text-neutral-300 italic">{shot.description_detail || "-"}</span>
-                                                                    </div>
-                                                                    <div className="flex flex-col gap-1">
-                                                                        <span className="text-neutral-600 uppercase font-black text-[9px]">{language === 'en' ? 'PROPS' : 'UTILERÍA'}:</span>
-                                                                        <span className="text-xs text-neutral-400">{shot.props || "-"}</span>
-                                                                    </div>
-                                                                    <div className="flex flex-col gap-1">
-                                                                        <span className="text-neutral-600 uppercase font-black text-[9px]">{language === 'en' ? 'DETAIL' : 'DETALLE'}:</span>
-                                                                        <span className="text-xs text-indigo-400">{shot.detail_shot || "-"}</span>
-                                                                    </div>
-                                                                    <div className="flex flex-col gap-1">
-                                                                        <span className="text-neutral-600 uppercase font-black text-[9px]">{language === 'en' ? 'ACTORS' : 'ACTORES'}:</span>
-                                                                        <span className="text-xs text-emerald-400">{shot.actors || "-"}</span>
-                                                                    </div>
-                                                                    {shot.type === 'MASTER SHOT' && (
-                                                                        <div className="flex flex-col gap-1 md:col-span-2">
-                                                                            <span className="text-amber-500/50 uppercase font-black text-[9px]">{language === 'en' ? 'DIRECTOR NOTE' : 'NOTA DIRECTOR'}:</span>
-                                                                            <span className="text-xs text-amber-200/70">{shot.note}</span>
-                                                                        </div>
-                                                                    )}
-                                                                </div>
-                                                            </div>
-
-                                                            {/* Action Buttons */}
-                                                            <div className="flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity translate-x-4 group-hover:translate-x-0">
-                                                                <div className="flex flex-col gap-1 bg-neutral-900 border border-neutral-800 rounded-lg p-1">
-                                                                    <button
-                                                                        onClick={() => handleAddShotAt(index)}
-                                                                        className="p-1.5 hover:bg-neutral-800 rounded text-amber-500/70 hover:text-amber-500 transition-colors flex items-center gap-2 text-[10px] font-bold"
-                                                                        title={language === 'en' ? "Insert Shot After" : "Insertar Plano Después"}
-                                                                    >
-                                                                        <Plus size={14} /> {language === 'en' ? "SHOT" : "PLANO"}
-                                                                    </button>
-                                                                    <button
-                                                                        onClick={() => handleAddSceneAt(index)}
-                                                                        className="p-1.5 hover:bg-neutral-800 rounded text-emerald-500/70 hover:text-emerald-500 transition-colors flex items-center gap-2 text-[10px] font-bold border-t border-neutral-800"
-                                                                        title={language === 'en' ? "Insert Scene After" : "Insertar Escena Después"}
-                                                                    >
-                                                                        <Clapperboard size={14} /> {language === 'en' ? "SCENE" : "ESCENA"}
-                                                                    </button>
-                                                                </div>
-                                                                <button
-                                                                    onClick={() => setEditingShotIndex(index)}
-                                                                    className="p-2 hover:bg-neutral-800 rounded text-neutral-400 hover:text-white transition-colors"
-                                                                    title="Edit"
-                                                                >
-                                                                    <Edit2 size={16} />
-                                                                </button>
-                                                                <button
-                                                                    onClick={() => handleDeleteShot(index)}
-                                                                    className="p-2 hover:bg-red-900/30 rounded text-neutral-400 hover:text-red-400 transition-colors"
-                                                                    title="Delete"
-                                                                >
-                                                                    <Trash2 size={16} />
-                                                                </button>
-                                                            </div>
-                                                        </>
-                                                    )}
+                                            {/* Audio, Props, Detail, Actors & Notes */}
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3 pt-3 border-t border-neutral-800/50">
+                                                <div className="flex flex-col gap-1">
+                                                    <span className="text-neutral-600 uppercase font-black text-[9px]">{language === 'en' ? 'AUDIO / SFX' : 'SONIDO/ EFECTOS'}:</span>
+                                                    <span className="text-xs text-neutral-400">{shot.audio}</span>
                                                 </div>
-                                            ))}
-                                            <div className="flex justify-center pt-8 pb-4 gap-4">
-                                                <button
-                                                    onClick={() => handleAddSceneAt((generatedConcept.shotList?.length || 1) - 1)}
-                                                    className="text-neutral-500 hover:text-amber-500 transition-colors text-sm flex items-center gap-2 group"
-                                                >
-                                                    <div className="w-8 h-8 rounded-full border border-dashed border-neutral-600 flex items-center justify-center group-hover:border-amber-500 group-hover:bg-amber-500/10 transition-all">
-                                                        <Film size={16} />
+                                                <div className="flex flex-col gap-1">
+                                                    <span className="text-neutral-600 uppercase font-black text-[9px]">{language === 'en' ? 'DESCRIPTION' : 'DESCRIPCIÓN'}:</span>
+                                                    <span className="text-xs text-neutral-300 italic">{shot.description_detail || "-"}</span>
+                                                </div>
+                                                <div className="flex flex-col gap-1">
+                                                    <span className="text-neutral-600 uppercase font-black text-[9px]">{language === 'en' ? 'PROPS' : 'UTILERÍA'}:</span>
+                                                    <span className="text-xs text-neutral-400">{shot.props || "-"}</span>
+                                                </div>
+                                                <div className="flex flex-col gap-1">
+                                                    <span className="text-neutral-600 uppercase font-black text-[9px]">{language === 'en' ? 'DETAIL' : 'DETALLE'}:</span>
+                                                    <span className="text-xs text-indigo-400">{shot.detail_shot || "-"}</span>
+                                                </div>
+                                                <div className="flex flex-col gap-1">
+                                                    <span className="text-neutral-600 uppercase font-black text-[9px]">{language === 'en' ? 'ACTORS' : 'ACTORES'}:</span>
+                                                    <span className="text-xs text-emerald-400">{shot.actors || "-"}</span>
+                                                </div>
+                                                {shot.type === 'MASTER SHOT' && (
+                                                    <div className="flex flex-col gap-1 md:col-span-2">
+                                                        <span className="text-amber-500/50 uppercase font-black text-[9px]">{language === 'en' ? 'DIRECTOR NOTE' : 'NOTA DIRECTOR'}:</span>
+                                                        <span className="text-xs text-amber-200/70">{shot.note}</span>
                                                     </div>
-                                                    {language === 'en' ? 'Add Final Scene' : 'Añadir Escena Final'}
-                                                </button>
-
-                                                <button
-                                                    onClick={handleExportPDF}
-                                                    className="text-neutral-500 hover:text-emerald-500 transition-colors text-sm flex items-center gap-2 group"
-                                                >
-                                                    <div className="w-8 h-8 rounded-full border border-dashed border-neutral-600 flex items-center justify-center group-hover:border-emerald-500 group-hover:bg-emerald-500/10 transition-all">
-                                                        <FileDown size={16} />
-                                                    </div>
-                                                    {language === 'en' ? 'Export to PDF' : 'Exportar a PDF'}
-                                                </button>
+                                                )}
                                             </div>
                                         </div>
-                                    )}
+
+                                        {/* Action Buttons */}
+                                        <div className="flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity translate-x-4 group-hover:translate-x-0">
+                                            <div className="flex flex-col gap-1 bg-neutral-900 border border-neutral-800 rounded-lg p-1">
+                                                <button
+                                                    onClick={() => handleAddShotAt(index)}
+                                                    className="p-1.5 hover:bg-neutral-800 rounded text-amber-500/70 hover:text-amber-500 transition-colors flex items-center gap-2 text-[10px] font-bold"
+                                                    title={language === 'en' ? "Insert Shot After" : "Insertar Plano Después"}
+                                                >
+                                                    <Plus size={14} /> {language === 'en' ? "SHOT" : "PLANO"}
+                                                </button>
+                                                <button
+                                                    onClick={() => handleAddSceneAt(index)}
+                                                    className="p-1.5 hover:bg-neutral-800 rounded text-emerald-500/70 hover:text-emerald-500 transition-colors flex items-center gap-2 text-[10px] font-bold border-t border-neutral-800"
+                                                    title={language === 'en' ? "Insert Scene After" : "Insertar Escena Después"}
+                                                >
+                                                    <Clapperboard size={14} /> {language === 'en' ? "SCENE" : "ESCENA"}
+                                                </button>
+                                            </div>
+                                            <button
+                                                onClick={() => setEditingShotIndex(index)}
+                                                className="p-2 hover:bg-neutral-800 rounded text-neutral-400 hover:text-white transition-colors"
+                                                title="Edit"
+                                            >
+                                                <Edit2 size={16} />
+                                            </button>
+                                            <button
+                                                onClick={() => handleDeleteShot(index)}
+                                                className="p-2 hover:bg-red-900/30 rounded text-neutral-400 hover:text-red-400 transition-colors"
+                                                title="Delete"
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
+                                        </div>
+                                    </>
+                                                    )}
                                 </div>
-                            </div>
-                        ) : (
-                            <div className="h-full border-2 border-dashed border-neutral-800 rounded-xl flex flex-col items-center justify-center p-8 text-center bg-neutral-900/20">
-                                <Film size={48} className="text-neutral-700 mb-4" />
-                                <h3 className="text-xl font-bold text-neutral-500 mb-2">
-                                    {language === 'en' ? 'Script Generator' : 'Generador de Guiones'}
-                                </h3>
-                                <p className="text-neutral-600 max-w-sm">
-                                    {language === 'en'
-                                        ? 'Enter your vision on the left and generate a complete project breakdown.'
-                                        : 'Introduce tu visión a la izquierda y genera un desglose de proyecto completo.'}
-                                </p>
+                                            ))}
+                                <div className="flex justify-center pt-8 pb-4 gap-4">
+                                    <button
+                                        onClick={() => handleAddSceneAt((generatedConcept.shotList?.length || 1) - 1)}
+                                        className="text-neutral-500 hover:text-amber-500 transition-colors text-sm flex items-center gap-2 group"
+                                    >
+                                        <div className="w-8 h-8 rounded-full border border-dashed border-neutral-600 flex items-center justify-center group-hover:border-amber-500 group-hover:bg-amber-500/10 transition-all">
+                                            <Film size={16} />
+                                        </div>
+                                        {language === 'en' ? 'Add Final Scene' : 'Añadir Escena Final'}
+                                    </button>
+
+                                    <button
+                                        onClick={handleExportPDF}
+                                        className="text-neutral-500 hover:text-emerald-500 transition-colors text-sm flex items-center gap-2 group"
+                                    >
+                                        <div className="w-8 h-8 rounded-full border border-dashed border-neutral-600 flex items-center justify-center group-hover:border-emerald-500 group-hover:bg-emerald-500/10 transition-all">
+                                            <FileDown size={16} />
+                                        </div>
+                                        {language === 'en' ? 'Export to PDF' : 'Exportar a PDF'}
+                                    </button>
+                                </div>
                             </div>
                         )}
                     </div>
                 </div>
+                ) : (
+                <div className="h-full border-2 border-dashed border-neutral-800 rounded-xl flex flex-col items-center justify-center p-8 text-center bg-neutral-900/20">
+                    <Film size={48} className="text-neutral-700 mb-4" />
+                    <h3 className="text-xl font-bold text-neutral-500 mb-2">
+                        {language === 'en' ? 'Script Generator' : 'Generador de Guiones'}
+                    </h3>
+                    <p className="text-neutral-600 max-w-sm">
+                        {language === 'en'
+                            ? 'Enter your vision on the left and generate a complete project breakdown.'
+                            : 'Introduce tu visión a la izquierda y genera un desglose de proyecto completo.'}
+                    </p>
+                </div>
+                        )}
             </div>
+        </div>
+            </div >
         </main >
     );
 }

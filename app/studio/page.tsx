@@ -184,7 +184,6 @@ export default function StudioPage() {
 
     const handleGenerate = () => {
         if (customVision.length < 5) return;
-        setIsPremium(true);
         const isEsp = language !== 'en';
         const newScript = getDetailedScript(isEsp, customVision, pacing, contrast, sceneCount) as any;
         setGeneratedConcept(newScript);
@@ -205,7 +204,7 @@ export default function StudioPage() {
                 setActiveTab("shotlist");
             }
             const isEsp = language !== 'en';
-            setGeneratedConcept(getDetailedScript(isEsp, customVision, newPacing, newContrast) as any);
+            setGeneratedConcept(getDetailedScript(isEsp, customVision, newPacing, newContrast, sceneCount) as any);
         }
     };
 

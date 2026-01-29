@@ -452,17 +452,16 @@ export default function StudioPage() {
                     {/* Left Column: Controls */}
                     <div className="lg:col-span-3 space-y-6">
 
-                        {/* Sinopsis Input */}
+                        {/* Guión Input */}
                         <section className="bg-neutral-900/50 p-6 rounded-xl border border-neutral-800">
                             <h2 className="text-sm font-semibold mb-2 flex items-center gap-2 text-neutral-400 uppercase tracking-wider">
-                                <Sparkles size={14} />
-                                {language === 'en' ? 'Synopsis' : 'Sinopsis'}
+                                {language === 'en' ? 'Screenplay' : 'Guión'}
                             </h2>
                             <textarea
                                 value={scriptText}
                                 onChange={(e) => setScriptText(e.target.value)}
                                 placeholder={language === 'en' ? "Paste your full screenplay here (e.g. ESC 1 / EXT / CAR - NIGHT...)" : "Pega tu guion completo aquí (ej. ESC 1 / EXT / AUTO - NOCHE...)"}
-                                className="w-full h-24 bg-neutral-950 border border-neutral-700 rounded-lg p-3 text-sm focus:border-amber-500 outline-none resize-none placeholder:text-neutral-600 mb-4"
+                                className="w-full h-24 bg-neutral-950 border border-neutral-700 rounded-lg p-3 text-sm text-neutral-100 focus:border-amber-500 outline-none resize-none placeholder:text-neutral-500 mb-4"
                             />
 
                             <div className="space-y-3 mb-6 bg-amber-500/5 p-4 rounded-lg border border-amber-500/10">
@@ -473,7 +472,7 @@ export default function StudioPage() {
                                     value={customVision}
                                     onChange={(e) => setCustomVision(e.target.value)}
                                     placeholder={language === 'en' ? "Short summary if no script provided..." : "Resumen corto si no tienes el guion..."}
-                                    className="w-full h-16 bg-transparent border-none p-0 text-xs focus:ring-0 outline-none resize-none placeholder:text-neutral-700"
+                                    className="w-full h-16 bg-transparent border-none p-0 text-xs text-neutral-300 focus:ring-0 outline-none resize-none placeholder:text-neutral-500"
                                 />
                             </div>
 

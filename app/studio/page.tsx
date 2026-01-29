@@ -668,6 +668,28 @@ export default function StudioPage() {
                     {/* Left Column: Controls */}
                     <div className="lg:col-span-3 space-y-6">
 
+                        {/* Reset / New Project Button */}
+                        <button
+                            onClick={() => {
+                                if (confirm(language === 'en' ? "Are you sure? This will clear everything." : "¿Estás seguro? Esto borrará todo tu progreso.")) {
+                                    localStorage.removeItem("studio_project_data");
+                                    setScriptText("");
+                                    setCustomVision("");
+                                    setGeneratedConcept(null);
+                                    setDuration(600);
+                                    setSceneCount(3);
+                                    setPacing(50);
+                                    setContrast(50);
+                                    setActiveTab("concept");
+                                    setAdvisorNote("");
+                                }
+                            }}
+                            className="w-full py-2 flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider text-neutral-500 hover:text-red-500 border border-neutral-800 hover:border-red-500/50 rounded-lg transition-all mb-2"
+                        >
+                            <Trash2 size={14} />
+                            {language === 'en' ? 'Reset Project' : 'Reiniciar Proyecto'}
+                        </button>
+
                         {/* Guión Input */}
                         <section className="bg-neutral-900/50 p-6 rounded-xl border border-neutral-800">
                             <h2 className="text-sm font-semibold mb-2 flex items-center gap-2 text-neutral-400 uppercase tracking-wider">
@@ -740,9 +762,11 @@ export default function StudioPage() {
 
                             {/* Duration Selector */}
                             <div className="space-y-3 mb-6">
-                                <label className="text-xs text-neutral-400 uppercase font-bold flex justify-between">
+                                <label className="text-xs text-neutral-400 uppercase font-bold flex flex-wrap items-end justify-between gap-2">
                                     <span>{language === 'en' ? 'Target Duration' : 'Duración Estimada'}</span>
-                                    <span className="text-amber-500">{formatTime(duration)}</span>
+                                    <span className="text-amber-500 bg-neutral-900 px-2 py-0.5 rounded text-[10px] tracking-wide border border-neutral-800">
+                                        {formatTime(duration)}
+                                    </span>
                                 </label>
                                 <input
                                     type="range" min="7" max="12600" step="1"

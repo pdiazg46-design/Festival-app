@@ -126,10 +126,19 @@ export default function StudioPage() {
 
             // 2. If no explicit marker, try to find the first non-technical line at the top
             if (!detectedTitle) {
-                const technicalTerms = ["INT.", "EXT.", "INT/", "EXT/", "ESCENA", "ESC ", "SCENE", "DÍA", "NOCHE", "DAY", "NIGHT"];
-                const firstCleanLine = scriptLines.slice(0, 5).find(line => {
+                const technicalTerms = [
+                    "INT.", "EXT.", "INT/", "EXT/", "ESCENA", "ESC ", "SCENE",
+                    "DÍA", "NOCHE", "DAY", "NIGHT", "INTERIOR", "EXTERIOR", "ESTUDIO", "STUDIO"
+                ];
+                const firstCleanLine = scriptLines.slice(0, 10).find(line => {
                     const upper = line.toUpperCase();
-                    return !technicalTerms.some(term => upper.includes(term)) && line.length > 3 && line.length < 50;
+                    // Skip lines that contain technical terms or look like scene headers (numbers, dashes, slashes)
+                    const isTechnical = technicalTerms.some(term => upper.includes(term));
+                    const isSceneHeader = /^[\d\s\/\.\-]+$/.test(line); // Just numbers and symbols
+                    const isShort = line.length < 3;
+                    const isTooLong = line.length > 60;
+
+                    return !isTechnical && !isSceneHeader && !isShort && !isTooLong;
                 });
                 if (firstCleanLine) detectedTitle = firstCleanLine.toUpperCase();
             }
@@ -334,39 +343,52 @@ export default function StudioPage() {
         }
     };
 
-    // Shot Actions - Enhanced Hierarchy
-    const handleAddScene = () => {
-        if (!generatedConcept) return;
-        const currentShots = generatedConcept.shotList || [];
-        const lastShot = currentShots[currentShots.length - 1];
-        const nextSceneNum = lastShot ? (parseInt(lastShot.scene) + 1).toString() : "1";
+    // Helper to renumber all shots globally
+    const renumberShots = (list: any[]) => {
+        let currentSceneNum = 0;
+        return list.map((shot, index) => {
+            if (shot.type === "MASTER SHOT") {
+                currentSceneNum++;
+            }
+            return {
+                ...shot,
+                id: (index + 1).toString(),
+                scene: currentSceneNum.toString() || "1"
+            };
+        });
+    };
 
-        const newSceneMaster = {
-            id: `${currentShots.length + 1}`,
-            scene: nextSceneNum,
+    const handleAddSceneAt = (index: number) => {
+        if (!generatedConcept || !generatedConcept.shotList) return;
+
+        const newScene = {
+            id: "", // Will be renumbered
+            scene: "", // Will be renumbered
             time: "00:00",
             type: "MASTER SHOT",
             lens: "24mm",
-            subject: language === 'en' ? `Opening Scene ${nextSceneNum}` : `Apertura de Escena ${nextSceneNum}`,
+            subject: language === 'en' ? "New Scene" : "Nueva Escena",
             description_detail: "",
-            audio: language === 'en' ? "Ambience synchronized" : "Ambiente sincronizado",
+            audio: language === 'en' ? "Ambience" : "Ambiente",
             props: "",
             detail_shot: "",
             actors: "",
-            note: language === 'en' ? "Scene transition." : "Transición de escena."
+            note: ""
         };
 
-        const updatedList = [...currentShots, newSceneMaster];
-        setGeneratedConcept({ ...generatedConcept, shotList: updatedList });
-        setEditingShotIndex(updatedList.length - 1);
+        const newList = [...generatedConcept.shotList];
+        newList.splice(index + 1, 0, newScene);
+        const renumbered = renumberShots(newList);
+        setGeneratedConcept({ ...generatedConcept, shotList: renumbered });
+        setEditingShotIndex(index + 1);
     };
 
-    const handleAddShotToScene = (sceneNum: string, afterIndex: number) => {
+    const handleAddShotAt = (index: number) => {
         if (!generatedConcept || !generatedConcept.shotList) return;
 
         const newShot = {
-            id: `${generatedConcept.shotList.length + 1}`,
-            scene: sceneNum,
+            id: "", // Will be renumbered
+            scene: "", // Will be renumbered
             time: "00:00",
             type: "MEDIUM / DETAIL",
             lens: "50mm",
@@ -379,16 +401,18 @@ export default function StudioPage() {
             note: ""
         };
 
-        const updatedList = [...generatedConcept.shotList];
-        updatedList.splice(afterIndex + 1, 0, newShot);
-        setGeneratedConcept({ ...generatedConcept, shotList: updatedList });
-        setEditingShotIndex(afterIndex + 1);
+        const newList = [...generatedConcept.shotList];
+        newList.splice(index + 1, 0, newShot);
+        const renumbered = renumberShots(newList);
+        setGeneratedConcept({ ...generatedConcept, shotList: renumbered });
+        setEditingShotIndex(index + 1);
     };
 
     const handleDeleteShot = (index: number) => {
         if (!generatedConcept || !generatedConcept.shotList) return;
-        const updatedList = generatedConcept.shotList.filter((_, i) => i !== index);
-        setGeneratedConcept({ ...generatedConcept, shotList: updatedList });
+        const newList = generatedConcept.shotList.filter((_, i) => i !== index);
+        const renumbered = renumberShots(newList);
+        setGeneratedConcept({ ...generatedConcept, shotList: renumbered });
         if (editingShotIndex === index) setEditingShotIndex(null);
     };
 
@@ -396,7 +420,9 @@ export default function StudioPage() {
         if (!generatedConcept || !generatedConcept.shotList) return;
         const updatedList = [...generatedConcept.shotList];
         updatedList[index] = { ...updatedList[index], [field]: value };
-        setGeneratedConcept({ ...generatedConcept, shotList: updatedList });
+        // If type changed value to MASTER SHOT or vice versa, we should renumber
+        const finalContent = field === 'type' ? renumberShots(updatedList) : updatedList;
+        setGeneratedConcept({ ...generatedConcept, shotList: finalContent });
     };
 
     // Export PDF Function
@@ -1028,7 +1054,10 @@ export default function StudioPage() {
                                                                             ? "bg-amber-500 text-black border-amber-400 shadow-[0_0_10px_rgba(245,158,11,0.3)]"
                                                                             : "text-amber-500 bg-amber-950/20 border-amber-900/40"
                                                                     )}>
-                                                                        SC {shot.scene || "1"}
+                                                                        SC {shot.scene}
+                                                                    </span>
+                                                                    <span className="font-bold text-xs px-2 py-0.5 rounded border border-neutral-700 bg-neutral-800 text-neutral-300">
+                                                                        {language === 'en' ? 'SHOT' : 'PLANO'} {shot.id}
                                                                     </span>
                                                                     <span className={cn(
                                                                         "font-bold tracking-wide text-sm uppercase px-2 py-0.5 rounded border",
@@ -1052,6 +1081,10 @@ export default function StudioPage() {
                                                                         <span className="text-xs text-neutral-400">{shot.audio}</span>
                                                                     </div>
                                                                     <div className="flex flex-col gap-1">
+                                                                        <span className="text-neutral-600 uppercase font-black text-[9px]">{language === 'en' ? 'DESCRIPTION' : 'DESCRIPCIÓN'}:</span>
+                                                                        <span className="text-xs text-neutral-300 italic">{shot.description_detail || "-"}</span>
+                                                                    </div>
+                                                                    <div className="flex flex-col gap-1">
                                                                         <span className="text-neutral-600 uppercase font-black text-[9px]">{language === 'en' ? 'PROPS' : 'UTILERÍA'}:</span>
                                                                         <span className="text-xs text-neutral-400">{shot.props || "-"}</span>
                                                                     </div>
@@ -1063,22 +1096,33 @@ export default function StudioPage() {
                                                                         <span className="text-neutral-600 uppercase font-black text-[9px]">{language === 'en' ? 'ACTORS' : 'ACTORES'}:</span>
                                                                         <span className="text-xs text-emerald-400">{shot.actors || "-"}</span>
                                                                     </div>
-                                                                    <div className="flex flex-col gap-1 md:col-span-2">
-                                                                        <span className="text-amber-500/50 uppercase font-black text-[9px]">{language === 'en' ? 'DIRECTOR NOTE' : 'NOTA DIRECTOR'}:</span>
-                                                                        <span className="text-xs text-amber-200/70">{shot.note}</span>
-                                                                    </div>
+                                                                    {shot.type === 'MASTER SHOT' && (
+                                                                        <div className="flex flex-col gap-1 md:col-span-2">
+                                                                            <span className="text-amber-500/50 uppercase font-black text-[9px]">{language === 'en' ? 'DIRECTOR NOTE' : 'NOTA DIRECTOR'}:</span>
+                                                                            <span className="text-xs text-amber-200/70">{shot.note}</span>
+                                                                        </div>
+                                                                    )}
                                                                 </div>
                                                             </div>
 
                                                             {/* Action Buttons */}
                                                             <div className="flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity translate-x-4 group-hover:translate-x-0">
-                                                                <button
-                                                                    onClick={() => handleAddShotToScene(shot.scene, index)}
-                                                                    className="p-2 hover:bg-neutral-800 rounded text-amber-500/70 hover:text-amber-500 transition-colors"
-                                                                    title={language === 'en' ? "Add Shot After" : "Agregar Plano Después"}
-                                                                >
-                                                                    <Plus size={16} />
-                                                                </button>
+                                                                <div className="flex flex-col gap-1 bg-neutral-900 border border-neutral-800 rounded-lg p-1">
+                                                                    <button
+                                                                        onClick={() => handleAddShotAt(index)}
+                                                                        className="p-1.5 hover:bg-neutral-800 rounded text-amber-500/70 hover:text-amber-500 transition-colors flex items-center gap-2 text-[10px] font-bold"
+                                                                        title={language === 'en' ? "Insert Shot After" : "Insertar Plano Después"}
+                                                                    >
+                                                                        <Plus size={14} /> {language === 'en' ? "SHOT" : "PLANO"}
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={() => handleAddSceneAt(index)}
+                                                                        className="p-1.5 hover:bg-neutral-800 rounded text-emerald-500/70 hover:text-emerald-500 transition-colors flex items-center gap-2 text-[10px] font-bold border-t border-neutral-800"
+                                                                        title={language === 'en' ? "Insert Scene After" : "Insertar Escena Después"}
+                                                                    >
+                                                                        <Clapperboard size={14} /> {language === 'en' ? "SCENE" : "ESCENA"}
+                                                                    </button>
+                                                                </div>
                                                                 <button
                                                                     onClick={() => setEditingShotIndex(index)}
                                                                     className="p-2 hover:bg-neutral-800 rounded text-neutral-400 hover:text-white transition-colors"
@@ -1100,13 +1144,13 @@ export default function StudioPage() {
                                             ))}
                                             <div className="flex justify-center pt-8 pb-4 gap-4">
                                                 <button
-                                                    onClick={handleAddScene}
+                                                    onClick={() => handleAddSceneAt((generatedConcept.shotList?.length || 1) - 1)}
                                                     className="text-neutral-500 hover:text-amber-500 transition-colors text-sm flex items-center gap-2 group"
                                                 >
                                                     <div className="w-8 h-8 rounded-full border border-dashed border-neutral-600 flex items-center justify-center group-hover:border-amber-500 group-hover:bg-amber-500/10 transition-all">
                                                         <Film size={16} />
                                                     </div>
-                                                    {language === 'en' ? 'New Scene' : 'Nueva Escena'}
+                                                    {language === 'en' ? 'Add Final Scene' : 'Añadir Escena Final'}
                                                 </button>
 
                                                 <button

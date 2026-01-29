@@ -54,7 +54,14 @@ export default function StudioPage() {
     const [contrast, setContrast] = useState(50); // 0 (Natural) to 100 (Stylized)
     const [sceneCount, setSceneCount] = useState(3); // Manual scene count (fallback)
     const [scriptText, setScriptText] = useState(""); // Full script content
-    const [duration, setDuration] = useState(10); // Duration in minutes
+    const [duration, setDuration] = useState(600); // Duration in SECONDS (Default 10 min)
+
+    const formatTime = (seconds: number) => {
+        if (seconds < 60) return `${seconds}s`;
+        const m = Math.floor(seconds / 60);
+        const s = Math.floor(seconds % 60);
+        return s > 0 ? `${m}m ${s}s` : `${m} min`;
+    };
 
     // Base Script Data Enhanced (Full Story Evolution)
     const getDetailedScript = (isEsp: boolean, script: string, pacingVal: number, contrastVal: number, scManualCount: number) => {
@@ -148,6 +155,16 @@ export default function StudioPage() {
                 detectedTitle = endingProposal.title.toUpperCase();
             }
 
+            // --- TIME & STRUCTURE LOGIC IN SECONDS ---
+            const totalSeconds = typeof duration === 'number' ? duration : 600;
+
+            // Calculate structural beats (approximate percentages)
+            const beat1 = Math.floor(totalSeconds * 0.20); // 20%
+            const beat2 = Math.floor(totalSeconds * 0.50); // 50% (Cumulative)
+            const beat3 = Math.floor(totalSeconds * 0.80); // 80% (Cumulative)
+
+            const fmt = formatTime;
+
             return {
                 title: detectedTitle,
                 logline: isEsp
@@ -158,20 +175,24 @@ export default function StudioPage() {
                 // AI SUGGESTED ENDING
                 suggestedEnding: endingProposal,
 
-                // RESTORED: STORY STRUCTURE (ESCALETA)
+                // DYNAMIC STORY STRUCTURE (ESCALETA)
                 escaleta: [
-                    { time: "0-2 min", title: isEsp ? "El Detonante" : "The Trigger", desc: act1 },
-                    { time: "2-5 min", title: isEsp ? "Desarrollo / Complicación" : "Development / Complication", desc: isEsp ? `La situación se complica: ${act2}` : `The situation gets complicated: ${act2}` },
-                    { time: "5-8 min", title: isEsp ? "El Punto de No Retorno" : "Point of No Return", desc: isEsp ? "El protagonista debe tomar una decisión drástica." : "The protagonist must make a drastic decision." },
-                    { time: "8-10 min", title: isEsp ? "Desenlace" : "Resolution", desc: act3 }
+                    { time: `0-${fmt(beat1)}`, title: isEsp ? "El Detonante" : "The Trigger", desc: act1 },
+                    { time: `${fmt(beat1)}-${fmt(beat2)}`, title: isEsp ? "Desarrollo / Complicación" : "Development / Complication", desc: isEsp ? `La situación se complica: ${act2}` : `The situation gets complicated: ${act2}` },
+                    { time: `${fmt(beat2)}-${fmt(beat3)}`, title: isEsp ? "El Punto de No Retorno" : "Point of No Return", desc: isEsp ? "El protagonista debe tomar una decisión drástica." : "The protagonist must make a drastic decision." },
+                    { time: `${fmt(beat3)}-${fmt(totalSeconds)}`, title: isEsp ? "Desenlace" : "Resolution", desc: act3 }
                 ],
 
-                // DETAILED TECHNICAL SCRIPT (SHOT LIST) - One shot per detected scene as a starting point
+                // DETAILED TECHNICAL SCRIPT (SHOT LIST)
                 shotList: Array.from({ length: detectedSceneCount }).map((_, i) => {
                     const sceneNum = i + 1;
-                    const timePerSc = (duration * 60) / detectedSceneCount;
+                    const timePerSc = totalSeconds / detectedSceneCount;
                     const elapsed = i * timePerSc;
-                    const timeStr = `${Math.floor(elapsed / 60).toString().padStart(2, '0')}:${(Math.floor(elapsed % 60)).toString().padStart(2, '0')}`;
+
+                    // Format as MM:SS for the table, or SSs if very short
+                    const m = Math.floor(elapsed / 60);
+                    const s = Math.floor(elapsed % 60);
+                    const timeStr = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 
                     return {
                         id: (i + 1).toString(),
@@ -225,7 +246,34 @@ export default function StudioPage() {
         const finalInput = scriptText || customVision;
         if (finalInput.length < 5) return;
         const isEsp = language !== 'en';
-        const newScript = getDetailedScript(isEsp, finalInput, pacing, contrast, sceneCount) as any;
+        const newScript = getDetailedScript(isEsp, finalInput, pacing, contrast, sceneCount /* duration is used inside but passed via state context if simpler, or let's pass it for purity */);
+        // Actually getDetailedScript is a closure that uses 'duration' from state scope? 
+        // Checking the original code... 
+        // ORIGINAL: const getDetailedScript = (isEsp: boolean, script: string, pacingVal: number, contrastVal: number, scManualCount: number) => { ... }
+        // It uses 'duration' from the component scope inside.
+        // Wait, line 172 in original: "const timePerSc = (duration * 60) / detectedSceneCount;"
+        // Yes, it captures 'duration' from the component state scope.
+        // But for clarity and correctness (since I'm editing the function definition in chunk 2), let's ensure it uses the 'totalSeconds' variable I defined there which takes 'duration' from scope.
+        // My replacement chunk 2 uses: "const totalSeconds = typeof duration === 'number' ? duration : 600;"
+        // So it captures 'duration' from state.
+
+        // This chunk is just to match the tool call validation if I changed line 228. 
+        // Wait, do I need to change line 228? 
+        // "const newScript = getDetailedScript(isEsp, finalInput, pacing, contrast, sceneCount) as any;"
+        // The signature didn't change in my Chunk 2 replacement (lines 151-191 replacement inside the function body, or start line 60 for the function def).
+        // Let's check Chunk 2 target content... 
+        // Chunk 2 targets lines 151-191 (return object). It does NOT target the function signature line 60.
+        // Line 60: "const getDetailedScript = (isEsp: boolean, script: string, pacingVal: number, contrastVal: number, scManualCount: number) => {"
+        // I am NOT changing the signature. I am referencing 'duration' from the closure scope which is 'seconds' now.
+        // So "min * 60" logic in original was relying on 'duration' being minutes.
+        // My new logic "const totalSeconds = duration" relies on 'duration' being seconds.
+        // So I don't need to change line 228.
+
+        // Actually, I should check if there are other calls to getDetailedScript.
+        // Line 247: "setGeneratedConcept(getDetailedScript(isEsp, scriptText, newPacing, newContrast, sceneCount) as any);"
+        // This is also fine.
+
+        // So this chunk is NOT needed.
         setGeneratedConcept(newScript);
         setActiveTab("concept"); // Reset to Concept to show the storage evolution first
         setRefinementStep(0);
@@ -694,16 +742,18 @@ export default function StudioPage() {
                             <div className="space-y-3 mb-6">
                                 <label className="text-xs text-neutral-400 uppercase font-bold flex justify-between">
                                     <span>{language === 'en' ? 'Target Duration' : 'Duración Estimada'}</span>
-                                    <span className="text-amber-500">{duration} min</span>
+                                    <span className="text-amber-500">{formatTime(duration)}</span>
                                 </label>
                                 <input
-                                    type="range" min="1" max="210" value={duration}
+                                    type="range" min="7" max="12600" step="1"
+                                    value={duration}
                                     onChange={(e) => setDuration(parseInt(e.target.value))}
                                     className="w-full h-1.5 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-amber-500"
                                 />
-                                <p className="text-[10px] text-neutral-500 italic">
-                                    {language === 'en' ? 'From short films (7s) to features (210m).' : 'Desde cortos (7s) hasta largometrajes (210m).'}
-                                </p>
+                                <div className="flex justify-between text-[10px] text-neutral-500 italic">
+                                    <span>7s (Reels)</span>
+                                    <span>210m (Film)</span>
+                                </div>
                             </div>
 
                             {/* Scene Count Selector - Conditional */}

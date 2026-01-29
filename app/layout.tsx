@@ -17,8 +17,8 @@ const robotoMono = Roboto_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Festival Strategy App",
-  description: "Film festival strategy and theme analysis",
+  title: "Portal AT-SIT Estudios",
+  description: "Plataforma de Integración Tecnológica para Cine y Festivales",
 };
 
 export default function RootLayout({

@@ -67,8 +67,8 @@ function Dashboard() {
             <SignedIn>
               <UserButton afterSignOutUrl="/" />
             </SignedIn>
-            <div className="relative w-24 h-12 md:w-48 md:h-24 shrink-0">
-              <img src="/logo.png" alt="DESFOGA Logo" className="object-contain w-full h-full object-right invert" />
+            <div className="relative w-24 h-12 md:w-56 md:h-28 shrink-0">
+              <img src="/at-sit-logo.png" alt="Portal AT-SIT Estudios" className="object-contain w-full h-full object-right" />
             </div>
           </div>
         </header>

@@ -488,10 +488,17 @@ export default function StudioPage() {
 
             // --- HEADER & BRANDING ---
             // Brand Logo / Name (Top Left)
-            doc.setFontSize(18);
-            doc.setFont("helvetica", "bold");
-            doc.setTextColor(245, 158, 11); // Amber 500
-            doc.text("DESGOGA", 5, 10);
+            try {
+                const logoImg = new Image();
+                logoImg.src = '/desfoga-logo.png';
+                await new Promise((resolve) => { logoImg.onload = resolve; logoImg.onerror = resolve; });
+                doc.addImage(logoImg, 'PNG', 5, 5, 50, 10);
+            } catch (e) {
+                doc.setFontSize(18);
+                doc.setFont("helvetica", "bold");
+                doc.setTextColor(0);
+                doc.text("DESFOGA", 5, 12);
+            }
 
             doc.setFontSize(8);
             doc.setTextColor(100);
@@ -590,7 +597,7 @@ export default function StudioPage() {
                 tableWidth: 'auto'
             });
 
-            doc.save(`Script_${generatedConcept.title.replace(/[^a-z0-9]/gi, '_')}_Legal.pdf`);
+            doc.save(`Script_${generatedConcept.title.replace(/[^a-z0-9]/gi, '_')}_Desfoga.pdf`);
 
         } catch (error) {
             console.error("Error generating PDF:", error);

@@ -109,12 +109,38 @@ export default function StudioPage() {
                 };
             }
 
-            // Simple keyword extractor for title (mock)
-            const keywords = inputContent.split(' ').filter((w: string) => w.length > 5);
-            const titleKeyword = keywords[0] ? keywords[0].toUpperCase() : (isEsp ? "PROYECTO NUEVO" : "NEW PROJECT");
+            // --- SMART TITLE DETECTION ---
+            const scriptLines = inputContent.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+            let detectedTitle = "";
+
+            // 1. Look for explicit Title markers
+            const titleLine = scriptLines.find(l =>
+                l.toUpperCase().startsWith("TÍTULO:") ||
+                l.toUpperCase().startsWith("TITLE:") ||
+                l.toUpperCase().startsWith("PROYECTO:")
+            );
+
+            if (titleLine) {
+                detectedTitle = titleLine.split(':')[1]?.trim().toUpperCase();
+            }
+
+            // 2. If no explicit marker, try to find the first non-technical line at the top
+            if (!detectedTitle) {
+                const technicalTerms = ["INT.", "EXT.", "INT/", "EXT/", "ESCENA", "ESC ", "SCENE", "DÍA", "NOCHE", "DAY", "NIGHT"];
+                const firstCleanLine = scriptLines.slice(0, 5).find(line => {
+                    const upper = line.toUpperCase();
+                    return !technicalTerms.some(term => upper.includes(term)) && line.length > 3 && line.length < 50;
+                });
+                if (firstCleanLine) detectedTitle = firstCleanLine.toUpperCase();
+            }
+
+            // 3. Fallback to Theme-based suggestion or Generic
+            if (!detectedTitle || detectedTitle.length < 3) {
+                detectedTitle = endingProposal.title.toUpperCase();
+            }
 
             return {
-                title: isEsp ? `PROYECTO: ${titleKeyword}` : `PROJECT: ${titleKeyword}`,
+                title: detectedTitle,
                 logline: isEsp
                     ? `Cuando un ${inputContent.toLowerCase().includes('mujer') ? 'mujer' : 'personaje'} se enfrenta a "${inputContent.substring(0, 50)}...", deberá luchar contra lo imposible para lograr su objetivo principal antes de que sea demasiado tarde.`
                     : `When a ${inputContent.toLowerCase().includes('woman') ? 'woman' : 'character'} faces "${inputContent.substring(0, 50)}...", they must fight against the odds to achieve their goal before it's too late.`,

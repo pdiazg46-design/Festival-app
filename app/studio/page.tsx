@@ -108,8 +108,8 @@ export default function StudioPage() {
             return {
                 title: isEsp ? `PROYECTO: ${titleKeyword}` : `PROJECT: ${titleKeyword}`,
                 logline: isEsp
-                    ? `Una historia sobre: "${vision}". Explorando temas de aislamiento y transformación.`
-                    : `A story about: "${vision}". Exploring themes of isolation and transformation.`,
+                    ? `Cuando un ${vision.toLowerCase().includes('mujer') ? 'mujer' : 'personaje'} se enfrenta a "${vision.substring(0, 50)}...", deberá luchar contra lo imposible para lograr su objetivo principal antes de que sea demasiado tarde.`
+                    : `When a ${vision.toLowerCase().includes('woman') ? 'woman' : 'character'} faces "${vision.substring(0, 50)}...", they must fight against the odds to achieve their goal before it's too late.`,
                 ref: isEsp ? "Ref: Estilo visual adaptado al input del usuario." : "Ref: Visual style adapted to user input.",
 
                 // AI SUGGESTED ENDING

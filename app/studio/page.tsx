@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowLeft, Clapperboard, Film, Users, MapPin, DollarSign, Target, Sparkles, Copy, MonitorPlay, Trophy, Check, X, Trash2, Plus, Edit2, FileDown } from "lucide-react";
 import Link from "next/link";
 import { useLanguage } from "../context/LanguageContext";
@@ -225,6 +225,38 @@ export default function StudioPage() {
     const [isDragging, setIsDragging] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
 
+    // Persistence Logic
+    useEffect(() => {
+        const savedData = localStorage.getItem("studio_project_data");
+        if (savedData) {
+            try {
+                const parsed = JSON.parse(savedData);
+                if (parsed.generatedConcept) setGeneratedConcept(parsed.generatedConcept);
+                if (parsed.scriptText) setScriptText(parsed.scriptText);
+                if (parsed.duration) setDuration(parsed.duration);
+                if (parsed.sceneCount) setSceneCount(parsed.sceneCount);
+                if (parsed.pacing) setPacing(parsed.pacing);
+                if (parsed.contrast) setContrast(parsed.contrast);
+                if (parsed.customVision) setCustomVision(parsed.customVision);
+            } catch (e) {
+                console.error("Error loading saved data", e);
+            }
+        }
+    }, []);
+
+    useEffect(() => {
+        const dataToSave = {
+            generatedConcept,
+            scriptText,
+            duration,
+            sceneCount,
+            pacing,
+            contrast,
+            customVision
+        };
+        localStorage.setItem("studio_project_data", JSON.stringify(dataToSave));
+    }, [generatedConcept, scriptText, duration, sceneCount, pacing, contrast, customVision]);
+
     const extractTextFromPDF = async (file: File) => {
         setIsProcessing(true);
         try {
@@ -276,26 +308,55 @@ export default function StudioPage() {
         }
     };
 
-    // Shot Actions
-    const handleAddShot = () => {
+    // Shot Actions - Enhanced Hierarchy
+    const handleAddScene = () => {
         if (!generatedConcept) return;
-        const newShot = {
-            id: `${generatedConcept.shotList?.length ? generatedConcept.shotList.length + 1 : 1}`,
-            scene: "1",
+        const currentShots = generatedConcept.shotList || [];
+        const lastShot = currentShots[currentShots.length - 1];
+        const nextSceneNum = lastShot ? (parseInt(lastShot.scene) + 1).toString() : "1";
+
+        const newSceneMaster = {
+            id: `${currentShots.length + 1}`,
+            scene: nextSceneNum,
             time: "00:00",
-            type: "WIDE",
-            lens: "35mm",
-            subject: language === 'en' ? "New Shot Description..." : "Descripción del nuevo plano...",
+            type: "MASTER SHOT",
+            lens: "24mm",
+            subject: language === 'en' ? `Opening Scene ${nextSceneNum}` : `Apertura de Escena ${nextSceneNum}`,
             description_detail: "",
-            audio: language === 'en' ? "Audio notes..." : "Notas de audio...",
+            audio: language === 'en' ? "Ambience synchronized" : "Ambiente sincronizado",
             props: "",
             detail_shot: "",
             actors: "",
-            note: language === 'en' ? "Director's note..." : "Nota del director..."
+            note: language === 'en' ? "Scene transition." : "Transición de escena."
         };
-        const updatedList = [...(generatedConcept.shotList || []), newShot];
+
+        const updatedList = [...currentShots, newSceneMaster];
         setGeneratedConcept({ ...generatedConcept, shotList: updatedList });
-        setEditingShotIndex(updatedList.length - 1); // Auto-focus new shot
+        setEditingShotIndex(updatedList.length - 1);
+    };
+
+    const handleAddShotToScene = (sceneNum: string, afterIndex: number) => {
+        if (!generatedConcept || !generatedConcept.shotList) return;
+
+        const newShot = {
+            id: `${generatedConcept.shotList.length + 1}`,
+            scene: sceneNum,
+            time: "00:00",
+            type: "MEDIUM / DETAIL",
+            lens: "50mm",
+            subject: language === 'en' ? "Secondary Shot" : "Plano Secundario",
+            description_detail: "",
+            audio: "",
+            props: "",
+            detail_shot: "",
+            actors: "",
+            note: ""
+        };
+
+        const updatedList = [...generatedConcept.shotList];
+        updatedList.splice(afterIndex + 1, 0, newShot);
+        setGeneratedConcept({ ...generatedConcept, shotList: updatedList });
+        setEditingShotIndex(afterIndex + 1);
     };
 
     const handleDeleteShot = (index: number) => {
@@ -935,8 +996,22 @@ export default function StudioPage() {
                                                             {/* Shot Details */}
                                                             <div className="flex-1 space-y-2">
                                                                 <div className="flex flex-wrap items-center gap-3 mb-1">
-                                                                    <span className="text-amber-500 font-bold text-xs bg-amber-950/20 px-2 py-0.5 rounded border border-amber-900/40">SC {shot.scene || "1"}</span>
-                                                                    <span className="text-emerald-400 font-bold tracking-wide text-sm uppercase bg-emerald-950/30 px-2 py-0.5 rounded border border-emerald-900/50">{shot.type}</span>
+                                                                    <span className={cn(
+                                                                        "font-bold text-xs px-2 py-0.5 rounded border transition-all",
+                                                                        shot.type === 'MASTER SHOT'
+                                                                            ? "bg-amber-500 text-black border-amber-400 shadow-[0_0_10px_rgba(245,158,11,0.3)]"
+                                                                            : "text-amber-500 bg-amber-950/20 border-amber-900/40"
+                                                                    )}>
+                                                                        SC {shot.scene || "1"}
+                                                                    </span>
+                                                                    <span className={cn(
+                                                                        "font-bold tracking-wide text-sm uppercase px-2 py-0.5 rounded border",
+                                                                        shot.type === 'MASTER SHOT'
+                                                                            ? "bg-emerald-500 text-black border-emerald-400"
+                                                                            : "text-emerald-400 bg-emerald-950/30 border-emerald-900/50"
+                                                                    )}>
+                                                                        {shot.type}
+                                                                    </span>
                                                                     <span className="text-neutral-500 text-xs font-mono">{shot.time}</span>
                                                                 </div>
                                                                 <h3 className="text-lg font-bold text-white leading-snug">{shot.subject}</h3>
@@ -972,6 +1047,13 @@ export default function StudioPage() {
                                                             {/* Action Buttons */}
                                                             <div className="flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity translate-x-4 group-hover:translate-x-0">
                                                                 <button
+                                                                    onClick={() => handleAddShotToScene(shot.scene, index)}
+                                                                    className="p-2 hover:bg-neutral-800 rounded text-amber-500/70 hover:text-amber-500 transition-colors"
+                                                                    title={language === 'en' ? "Add Shot After" : "Agregar Plano Después"}
+                                                                >
+                                                                    <Plus size={16} />
+                                                                </button>
+                                                                <button
                                                                     onClick={() => setEditingShotIndex(index)}
                                                                     className="p-2 hover:bg-neutral-800 rounded text-neutral-400 hover:text-white transition-colors"
                                                                     title="Edit"
@@ -992,13 +1074,13 @@ export default function StudioPage() {
                                             ))}
                                             <div className="flex justify-center pt-8 pb-4 gap-4">
                                                 <button
-                                                    onClick={handleAddShot}
+                                                    onClick={handleAddScene}
                                                     className="text-neutral-500 hover:text-amber-500 transition-colors text-sm flex items-center gap-2 group"
                                                 >
                                                     <div className="w-8 h-8 rounded-full border border-dashed border-neutral-600 flex items-center justify-center group-hover:border-amber-500 group-hover:bg-amber-500/10 transition-all">
-                                                        <Plus size={16} />
+                                                        <Film size={16} />
                                                     </div>
-                                                    {language === 'en' ? 'Add New Shot' : 'Añadir Nuevo Plano'}
+                                                    {language === 'en' ? 'New Scene' : 'Nueva Escena'}
                                                 </button>
 
                                                 <button
@@ -1031,6 +1113,6 @@ export default function StudioPage() {
                     </div>
                 </div>
             </div>
-        </main>
+        </main >
     );
 }

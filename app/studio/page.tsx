@@ -575,7 +575,7 @@ export default function StudioPage() {
                 columnStyles: {
                     0: { cellWidth: 10 }, // #
                     1: { cellWidth: 8 },  // Esc
-                    2: { cellWidth: 12 }, // Time
+                    2: { cellWidth: 18 }, // Time (Wider)
                     3: { cellWidth: 20 }, // Type
                     4: { cellWidth: 12 }, // Lens
                     5: { cellWidth: 50 }, // Action
@@ -588,7 +588,7 @@ export default function StudioPage() {
                 },
                 headStyles: {
                     fillColor: [23, 23, 23],
-                    textColor: [245, 158, 11], // Amber text
+                    textColor: [245, 158, 11], // Amber 500
                     fontStyle: 'bold',
                     halign: 'center'
                 },
@@ -597,7 +597,7 @@ export default function StudioPage() {
                 tableWidth: 'auto'
             });
 
-            doc.save(`Script_${generatedConcept.title.replace(/[^a-z0-9]/gi, '_')}_Desfoga.pdf`);
+            doc.save(`Script_${generatedConcept.title.replace(/[^a-z0-9]/gi, '_')}_Desfoga_v2.pdf`);
 
         } catch (error) {
             console.error("Error generating PDF:", error);

@@ -557,17 +557,23 @@ export default function StudioPage() {
                                 )}
                             </div>
 
-                            <div className="space-y-3 mb-6 bg-amber-500/5 p-4 rounded-lg border border-amber-500/10">
-                                <h3 className="text-[10px] font-black uppercase text-amber-500/60 tracking-tighter">
-                                    {language === 'en' ? 'Quick Plot Idea (Optional)' : 'Idea Rápida / Sinopsis (Opcional)'}
-                                </h3>
-                                <textarea
-                                    value={customVision}
-                                    onChange={(e) => setCustomVision(e.target.value)}
-                                    placeholder={language === 'en' ? "Short summary if no script provided..." : "Resumen corto si no tienes el guion..."}
-                                    className="w-full h-16 bg-transparent border-none p-0 text-xs text-neutral-300 focus:ring-0 outline-none resize-none placeholder:text-neutral-500"
-                                />
-                            </div>
+                            {!scriptText || scriptText.length < 10 ? (
+                                <div className="space-y-3 mb-6 bg-amber-500/5 p-4 rounded-lg border border-amber-500/10">
+                                    <h3 className="text-[10px] font-black uppercase text-amber-500/60 tracking-tighter">
+                                        {language === 'en' ? 'Quick Plot Idea (Optional)' : 'Idea Rápida / Sinopsis (Opcional)'}
+                                    </h3>
+                                    <textarea
+                                        value={customVision}
+                                        onChange={(e) => setCustomVision(e.target.value)}
+                                        placeholder={language === 'en' ? "Short summary if no script provided..." : "Resumen corto si no tienes el guion..."}
+                                        className="w-full h-16 bg-transparent border-none p-0 text-xs text-neutral-300 focus:ring-0 outline-none resize-none placeholder:text-neutral-500"
+                                    />
+                                </div>
+                            ) : (
+                                <div className="mb-6 p-3 bg-neutral-950/50 rounded-lg border border-neutral-800 text-[10px] text-neutral-500 italic">
+                                    {language === 'en' ? 'Using full screenplay for generation. Quick Plot ignored.' : 'Usando el guión completo para la generación. Idea rápida omitida.'}
+                                </div>
+                            )}
 
                             {/* Duration Selector */}
                             <div className="space-y-3 mb-6">
@@ -585,21 +591,35 @@ export default function StudioPage() {
                                 </p>
                             </div>
 
-                            {/* Scene Count Selector */}
-                            <div className="space-y-3 mb-6">
-                                <label className="text-xs text-neutral-400 uppercase font-bold flex justify-between">
-                                    <span>{language === 'en' ? 'Scenes' : 'Escenas'}</span>
-                                    <span className="text-amber-500">{sceneCount}</span>
-                                </label>
-                                <input
-                                    type="range" min="1" max="15" value={sceneCount}
-                                    onChange={(e) => setSceneCount(parseInt(e.target.value))}
-                                    className="w-full h-1.5 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-amber-500"
-                                />
-                                <p className="text-[10px] text-neutral-500 italic">
-                                    {language === 'en' ? 'Determines the number of AI-generated scenes.' : 'Determina el número de escenas generadas por la IA.'}
-                                </p>
-                            </div>
+                            {/* Scene Count Selector - Conditional */}
+                            {!scriptText || scriptText.length < 10 ? (
+                                <div className="space-y-3 mb-6">
+                                    <label className="text-xs text-neutral-400 uppercase font-bold flex justify-between">
+                                        <span>{language === 'en' ? 'Scenes' : 'Escenas'}</span>
+                                        <span className="text-amber-500">{sceneCount}</span>
+                                    </label>
+                                    <input
+                                        type="range" min="1" max="15" value={sceneCount}
+                                        onChange={(e) => setSceneCount(parseInt(e.target.value))}
+                                        className="w-full h-1.5 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-amber-500"
+                                    />
+                                    <p className="text-[10px] text-neutral-500 italic">
+                                        {language === 'en' ? 'Determines the number of AI-generated scenes.' : 'Determina el número de escenas generadas por la IA.'}
+                                    </p>
+                                </div>
+                            ) : (
+                                <div className="mb-6 space-y-2">
+                                    <div className="flex justify-between items-center bg-amber-500/10 p-3 rounded-lg border border-amber-500/20">
+                                        <span className="text-[10px] font-bold text-amber-500 uppercase tracking-widest">{language === 'en' ? 'Auto-Detected Scenes' : 'Escenas Detectadas'}</span>
+                                        <span className="bg-amber-500 text-black text-xs font-black px-2 py-0.5 rounded-full">
+                                            {scriptText.match(/(?:ESC|ESCENA|SCENE)\s*(\d+)/gi)?.length || 1}
+                                        </span>
+                                    </div>
+                                    <p className="text-[9px] text-neutral-500 px-1">
+                                        {language === 'en' ? 'AI will follow the structure of your script headers.' : 'La IA seguirá la estructura de los encabezados de tu guión.'}
+                                    </p>
+                                </div>
+                            )}
 
                             <button
                                 onClick={handleGenerate}

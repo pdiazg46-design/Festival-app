@@ -27,7 +27,7 @@ export default function StudioPage() {
                     </div>
                     <div>
                         <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-amber-200 to-yellow-600 mb-2">
-                            {language === 'en' ? 'Technical Director Studio' : 'Estudio de Dirección Técnica'}
+                            {language === 'en' ? 'Portal AT-SIT Studios' : 'Portal AT-SIT Estudios'}
                         </h1>
                         <p className="text-neutral-400">
                             {language === 'en'
@@ -142,10 +142,13 @@ export default function StudioPage() {
                     // Skip lines that contain technical terms or look like scene headers (numbers, dashes, slashes)
                     const isTechnical = technicalTerms.some(term => upper.includes(term));
                     const isSceneHeader = /^[\d\s\/\.\-]+$/.test(line); // Just numbers and symbols
+                    // Force exclude if it starts with common scene heading words even if not full match
+                    const startsWithTechnical = ["EXT", "INT", "CASA", "HABITACIÓN", "ROOM", "HOUSE", "STREET", "CALLE", "DIA", "NOCHE"].some(w => upper.startsWith(w));
+
                     const isShort = line.length < 3;
                     const isTooLong = line.length > 60;
 
-                    return !isTechnical && !isSceneHeader && !isShort && !isTooLong;
+                    return !isTechnical && !isSceneHeader && !startsWithTechnical && !isShort && !isTooLong;
                 });
                 if (firstCleanLine) detectedTitle = firstCleanLine.toUpperCase();
             }
@@ -464,6 +467,14 @@ export default function StudioPage() {
         if (editingShotIndex === index) setEditingShotIndex(null);
     };
 
+    // Handler for updating Structure (Escaleta)
+    const handleUpdateEscaleta = (index: number, field: 'title' | 'desc', value: string) => {
+        if (!generatedConcept || !generatedConcept.escaleta) return;
+        const newEscaleta = [...generatedConcept.escaleta];
+        newEscaleta[index] = { ...newEscaleta[index], [field]: value };
+        setGeneratedConcept({ ...generatedConcept, escaleta: newEscaleta });
+    };
+
     const handleUpdateShot = (index: number, field: string, value: string) => {
         if (!generatedConcept || !generatedConcept.shotList) return;
         const updatedList = [...generatedConcept.shotList];
@@ -490,19 +501,20 @@ export default function StudioPage() {
             // Brand Logo / Name (Top Left)
             try {
                 const logoImg = new Image();
-                logoImg.src = '/desfoga-logo.png';
+                logoImg.src = '/at-sit-logo.png';
                 await new Promise((resolve) => { logoImg.onload = resolve; logoImg.onerror = resolve; });
-                doc.addImage(logoImg, 'PNG', 5, 5, 50, 10);
+                doc.addImage(logoImg, 'PNG', 5, 5, 50, 15); // Slightly taller for AT-SIT logo
             } catch (e) {
                 doc.setFontSize(18);
                 doc.setFont("helvetica", "bold");
                 doc.setTextColor(0);
-                doc.text("DESFOGA", 5, 12);
+                doc.text("AT-SIT", 5, 12);
             }
 
             doc.setFontSize(8);
             doc.setTextColor(100);
-            doc.text("PRODUCTION STUDIO", 5, 22);
+            const subTitle = isEsp ? "INTEGRACIÓN TECNOLÓGICA" : "TECHNOLOGICAL INTEGRATION";
+            doc.text(subTitle, 5, 24); // Adjusted Y for new logo height
 
             // Timestamp (Top Right)
             const now = new Date();
@@ -597,7 +609,7 @@ export default function StudioPage() {
                 tableWidth: 'auto'
             });
 
-            doc.save(`Script_${generatedConcept.title.replace(/[^a-z0-9]/gi, '_')}_Desfoga_v2.pdf`);
+            doc.save(`Script_${generatedConcept.title.replace(/[^a-z0-9]/gi, '_')}_AT-SIT.pdf`);
 
         } catch (error) {
             console.error("Error generating PDF:", error);
@@ -910,7 +922,12 @@ export default function StudioPage() {
                                                 <Film size={14} />
                                                 {language === 'en' ? 'Project Overview' : 'Resumen del Proyecto'}
                                             </div>
-                                            <h2 className="text-4xl font-extrabold text-white mb-2">{generatedConcept.title}</h2>
+                                            <input
+                                                value={generatedConcept.title}
+                                                onChange={(e) => setGeneratedConcept({ ...generatedConcept, title: e.target.value })}
+                                                className="text-4xl font-extrabold text-white mb-2 bg-transparent border-none outline-none focus:ring-0 placeholder:text-neutral-700 w-full"
+                                                placeholder="Project Title"
+                                            />
                                         </div>
                                     </div>
                                 </div>
@@ -975,11 +992,20 @@ export default function StudioPage() {
                                         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2">
                                             <div className="space-y-4">
                                                 {generatedConcept.escaleta?.map((beat: any, i: number) => (
-                                                    <div key={i} className="flex gap-4 p-5 bg-neutral-900/50 rounded-xl border border-neutral-800 hover:border-amber-500/30 transition-all items-start">
-                                                        <div className="text-amber-500 font-mono text-xs font-bold whitespace-nowrap pt-1 w-20 bg-amber-500/10 py-1 px-2 rounded text-center">{beat.time}</div>
-                                                        <div>
-                                                            <h4 className="font-bold text-white mb-1 text-lg">{beat.title}</h4>
-                                                            <p className="text-neutral-400 text-sm leading-relaxed">{beat.desc}</p>
+                                                    <div key={i} className="flex gap-4 p-5 bg-neutral-900/50 rounded-xl border border-neutral-800 hover:border-amber-500/30 transition-all items-start group">
+                                                        <div className="text-amber-500 font-mono text-xs font-bold whitespace-nowrap pt-3 w-20 bg-amber-500/10 py-1 px-2 rounded text-center">{beat.time}</div>
+                                                        <div className="flex-1 space-y-2">
+                                                            <input
+                                                                value={beat.title}
+                                                                onChange={(e) => handleUpdateEscaleta(i, 'title', e.target.value)}
+                                                                className="font-bold text-white text-lg bg-transparent border border-transparent hover:border-neutral-700 focus:border-amber-500 rounded px-2 -ml-2 w-full outline-none transition-colors"
+                                                            />
+                                                            <textarea
+                                                                value={beat.desc}
+                                                                onChange={(e) => handleUpdateEscaleta(i, 'desc', e.target.value)}
+                                                                rows={2}
+                                                                className="text-neutral-400 text-sm leading-relaxed bg-transparent border border-transparent hover:border-neutral-700 focus:border-amber-500 rounded px-2 -ml-2 w-full outline-none transition-colors resize-none"
+                                                            />
                                                         </div>
                                                     </div>
                                                 ))}

@@ -377,397 +377,393 @@ export default function StudioPage() {
         localStorage.setItem("studio_project_data", JSON.stringify(dataToSave));
     }, [generatedConcept, scriptText, duration, sceneCount, pacing, contrast, customVision]);
 
-} finally {
-    setIsProcessing(false);
-}
-    };
 
-const extractTextFromPDF = async (file: File) => {
-    setIsProcessing(true);
-    try {
-        // Dynamic import of the legacy build for better compatibility
-        const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf');
+    const extractTextFromPDF = async (file: File) => {
+        setIsProcessing(true);
+        try {
+            // Dynamic import of the legacy build for better compatibility
+            const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf');
 
-        // Set worker using a reliable CDN that matches the installed version
-        pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`;
+            // Set worker using a reliable CDN that matches the installed version
+            pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`;
 
-        const arrayBuffer = await file.arrayBuffer();
-        const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
-        const pdf = await loadingTask.promise;
-        let fullText = "";
+            const arrayBuffer = await file.arrayBuffer();
+            const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+            const pdf = await loadingTask.promise;
+            let fullText = "";
 
-        // AT-SIT HYDRATION CHECK
-        // We look for a special marker in the last page or metadata logic
-        // Since we write white text at end, it should appear in textContent
-        let foundState = null;
+            // AT-SIT HYDRATION CHECK
+            // We look for a special marker in the last page or metadata logic
+            // Since we write white text at end, it should appear in textContent
+            let foundState = null;
 
-        for (let i = 1; i <= pdf.numPages; i++) {
-            const page = await pdf.getPage(i);
-            const textContent = await page.getTextContent();
-            const pageText = textContent.items
-                .map((item: any) => item.str)
-                .join(" ");
-            fullText += pageText + "\n\n";
+            for (let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i);
+                const textContent = await page.getTextContent();
+                const pageText = textContent.items
+                    .map((item: any) => item.str)
+                    .join(" ");
+                fullText += pageText + "\n\n";
 
-            // Check for injected state
-            if (pageText.includes("ATSIT_STATE_START")) {
-                try {
-                    const startIndex = pageText.indexOf("ATSIT_STATE_START");
-                    const endIndex = pageText.indexOf("ATSIT_STATE_END");
-                    if (startIndex !== -1 && endIndex !== -1) {
-                        const jsonStr = pageText.substring(startIndex + "ATSIT_STATE_START".length, endIndex);
-                        // It might have spaces due to PDF mapping, try to clean if simple parse fails
-                        // But usually hidden text remains contiguous or we can just filter non-base64 chars if encoded
-                        // Let's assume it's URI encoded or Base64 to avoid space issues
-                        foundState = JSON.parse(decodeURIComponent(jsonStr));
+                // Check for injected state
+                if (pageText.includes("ATSIT_STATE_START")) {
+                    try {
+                        const startIndex = pageText.indexOf("ATSIT_STATE_START");
+                        const endIndex = pageText.indexOf("ATSIT_STATE_END");
+                        if (startIndex !== -1 && endIndex !== -1) {
+                            const jsonStr = pageText.substring(startIndex + "ATSIT_STATE_START".length, endIndex);
+                            // It might have spaces due to PDF mapping, try to clean if simple parse fails
+                            // But usually hidden text remains contiguous or we can just filter non-base64 chars if encoded
+                            // Let's assume it's URI encoded or Base64 to avoid space issues
+                            foundState = JSON.parse(decodeURIComponent(jsonStr));
+                        }
+                    } catch (e) {
+                        console.error("Failed to hydrate state from PDF", e);
                     }
-                } catch (e) {
-                    console.error("Failed to hydrate state from PDF", e);
                 }
             }
-        }
 
-        if (foundState && foundState.generatedConcept) {
-            setGeneratedConcept(foundState.generatedConcept);
-            if (foundState.pacing) setPacing(foundState.pacing);
-            if (foundState.contrast) setContrast(foundState.contrast);
-            if (foundState.sceneCount) setSceneCount(foundState.sceneCount);
-            if (foundState.scriptText) setScriptText(foundState.scriptText);
+            if (foundState && foundState.generatedConcept) {
+                setGeneratedConcept(foundState.generatedConcept);
+                if (foundState.pacing) setPacing(foundState.pacing);
+                if (foundState.contrast) setContrast(foundState.contrast);
+                if (foundState.sceneCount) setSceneCount(foundState.sceneCount);
+                if (foundState.scriptText) setScriptText(foundState.scriptText);
 
+                setAdvisorNote(language === 'en'
+                    ? "✨ PROJECT RESTORED! We found a full project state inside this PDF. Welcome back."
+                    : "✨ ¡PROYECTO RESTAURADO! Encontramos un estado completo dentro de este PDF. Bienvenido de nuevo.");
+            } else if (fullText.trim().length === 0) {
+                throw new Error("Empty text extracted");
+            } else {
+                setScriptText(fullText);
+                setAdvisorNote(language === 'en' ? "PDF processed (Text Only)!" : "¡Texto del PDF procesado!");
+            }
+
+        } catch (err) {
+            console.error("PDF Processing Error:", err);
             setAdvisorNote(language === 'en'
-                ? "✨ PROJECT RESTORED! We found a full project state inside this PDF. Welcome back."
-                : "✨ ¡PROYECTO RESTAURADO! Encontramos un estado completo dentro de este PDF. Bienvenido de nuevo.");
-        } else if (fullText.trim().length === 0) {
-            throw new Error("Empty text extracted");
-        } else {
-            setScriptText(fullText);
-            setAdvisorNote(language === 'en' ? "PDF processed (Text Only)!" : "¡Texto del PDF procesado!");
+                ? "Could not read this PDF. Please copy and paste the text instead."
+                : "No pudimos leer este PDF. Por favor, copia y pega el texto directamente.");
+        } finally {
+            setIsProcessing(false);
         }
+    };
 
-    } catch (err) {
-        console.error("PDF Processing Error:", err);
-        setAdvisorNote(language === 'en'
-            ? "Could not read this PDF. Please copy and paste the text instead."
-            : "No pudimos leer este PDF. Por favor, copia y pega el texto directamente.");
-    } finally {
-        setIsProcessing(false);
-    }
-};
-
-const handleDrop = async (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    const file = e.dataTransfer.files[0];
-    if (file && file.type === "application/pdf") {
-        await extractTextFromPDF(file);
-    } else if (file && file.type === "text/plain") {
-        const text = await file.text();
-        setScriptText(text);
-    }
-};
-
-// Helper to renumber all shots globally
-const renumberShots = (list: any[]) => {
-    let currentSceneNum = 0;
-    return list.map((shot, index) => {
-        if (shot.type === "MASTER SHOT") {
-            currentSceneNum++;
+    const handleDrop = async (e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDragging(false);
+        const file = e.dataTransfer.files[0];
+        if (file && file.type === "application/pdf") {
+            await extractTextFromPDF(file);
+        } else if (file && file.type === "text/plain") {
+            const text = await file.text();
+            setScriptText(text);
         }
-        return {
-            ...shot,
-            id: (index + 1).toString(),
-            scene: currentSceneNum.toString() || "1"
+    };
+
+    // Helper to renumber all shots globally
+    const renumberShots = (list: any[]) => {
+        let currentSceneNum = 0;
+        return list.map((shot, index) => {
+            if (shot.type === "MASTER SHOT") {
+                currentSceneNum++;
+            }
+            return {
+                ...shot,
+                id: (index + 1).toString(),
+                scene: currentSceneNum.toString() || "1"
+            };
+        });
+    };
+
+    const handleAddSceneAt = (index: number) => {
+        if (!generatedConcept || !generatedConcept.shotList) return;
+
+        const newScene = {
+            id: "", // Will be renumbered
+            scene: "", // Will be renumbered
+            time: "00:00",
+            type: "MASTER SHOT",
+            lens: "24mm",
+            subject: language === 'en' ? "New Scene" : "Nueva Escena",
+            description_detail: "",
+            audio: language === 'en' ? "Ambience" : "Ambiente",
+            props: "",
+            detail_shot: "",
+            actors: "",
+            note: ""
         };
-    });
-};
 
-const handleAddSceneAt = (index: number) => {
-    if (!generatedConcept || !generatedConcept.shotList) return;
-
-    const newScene = {
-        id: "", // Will be renumbered
-        scene: "", // Will be renumbered
-        time: "00:00",
-        type: "MASTER SHOT",
-        lens: "24mm",
-        subject: language === 'en' ? "New Scene" : "Nueva Escena",
-        description_detail: "",
-        audio: language === 'en' ? "Ambience" : "Ambiente",
-        props: "",
-        detail_shot: "",
-        actors: "",
-        note: ""
+        const newList = [...generatedConcept.shotList];
+        newList.splice(index + 1, 0, newScene);
+        const renumbered = renumberShots(newList);
+        setGeneratedConcept({ ...generatedConcept, shotList: renumbered });
+        setEditingShotIndex(index + 1);
     };
 
-    const newList = [...generatedConcept.shotList];
-    newList.splice(index + 1, 0, newScene);
-    const renumbered = renumberShots(newList);
-    setGeneratedConcept({ ...generatedConcept, shotList: renumbered });
-    setEditingShotIndex(index + 1);
-};
+    const handleAddShotAt = (index: number) => {
+        if (!generatedConcept || !generatedConcept.shotList) return;
 
-const handleAddShotAt = (index: number) => {
-    if (!generatedConcept || !generatedConcept.shotList) return;
+        const newShot = {
+            id: "", // Will be renumbered
+            scene: "", // Will be renumbered
+            time: "00:00",
+            type: "MEDIUM / DETAIL",
+            lens: "50mm",
+            subject: language === 'en' ? "Secondary Shot" : "Plano Secundario",
+            description_detail: "",
+            audio: "",
+            props: "",
+            detail_shot: "",
+            actors: "",
+            note: ""
+        };
 
-    const newShot = {
-        id: "", // Will be renumbered
-        scene: "", // Will be renumbered
-        time: "00:00",
-        type: "MEDIUM / DETAIL",
-        lens: "50mm",
-        subject: language === 'en' ? "Secondary Shot" : "Plano Secundario",
-        description_detail: "",
-        audio: "",
-        props: "",
-        detail_shot: "",
-        actors: "",
-        note: ""
+        const newList = [...generatedConcept.shotList];
+        newList.splice(index + 1, 0, newShot);
+        const renumbered = renumberShots(newList);
+        setGeneratedConcept({ ...generatedConcept, shotList: renumbered });
+        setEditingShotIndex(index + 1);
     };
 
-    const newList = [...generatedConcept.shotList];
-    newList.splice(index + 1, 0, newShot);
-    const renumbered = renumberShots(newList);
-    setGeneratedConcept({ ...generatedConcept, shotList: renumbered });
-    setEditingShotIndex(index + 1);
-};
+    const handleDeleteShot = (index: number) => {
+        if (!generatedConcept || !generatedConcept.shotList) return;
+        const newList = generatedConcept.shotList.filter((_, i) => i !== index);
+        const renumbered = renumberShots(newList);
+        setGeneratedConcept({ ...generatedConcept, shotList: renumbered });
+        if (editingShotIndex === index) setEditingShotIndex(null);
+    };
 
-const handleDeleteShot = (index: number) => {
-    if (!generatedConcept || !generatedConcept.shotList) return;
-    const newList = generatedConcept.shotList.filter((_, i) => i !== index);
-    const renumbered = renumberShots(newList);
-    setGeneratedConcept({ ...generatedConcept, shotList: renumbered });
-    if (editingShotIndex === index) setEditingShotIndex(null);
-};
+    const handleImageUpload = async (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!generatedConcept || !generatedConcept.shotList || !e.target.files?.[0]) return;
 
-const handleImageUpload = async (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!generatedConcept || !generatedConcept.shotList || !e.target.files?.[0]) return;
+        const file = e.target.files[0];
+        const reader = new FileReader();
 
-    const file = e.target.files[0];
-    const reader = new FileReader();
+        reader.onloadend = () => {
+            const base64String = reader.result as string;
+            const updatedList = [...generatedConcept.shotList];
+            updatedList[index] = { ...updatedList[index], storyboardImage: base64String };
+            setGeneratedConcept({ ...generatedConcept, shotList: updatedList });
+        };
 
-    reader.onloadend = () => {
-        const base64String = reader.result as string;
+        reader.readAsDataURL(file);
+    };
+
+    const handleRemoveImage = (index: number) => {
+        if (!generatedConcept || !generatedConcept.shotList) return;
         const updatedList = [...generatedConcept.shotList];
-        updatedList[index] = { ...updatedList[index], storyboardImage: base64String };
+        updatedList[index] = { ...updatedList[index], storyboardImage: undefined };
         setGeneratedConcept({ ...generatedConcept, shotList: updatedList });
     };
 
-    reader.readAsDataURL(file);
-};
+    // Handler for updating Structure (Escaleta)
+    const handleUpdateEscaleta = (index: number, field: 'title' | 'desc', value: string) => {
+        if (!generatedConcept || !generatedConcept.escaleta) return;
+        const newEscaleta = [...generatedConcept.escaleta];
+        newEscaleta[index] = { ...newEscaleta[index], [field]: value };
+        setGeneratedConcept({ ...generatedConcept, escaleta: newEscaleta });
+    };
 
-const handleRemoveImage = (index: number) => {
-    if (!generatedConcept || !generatedConcept.shotList) return;
-    const updatedList = [...generatedConcept.shotList];
-    updatedList[index] = { ...updatedList[index], storyboardImage: undefined };
-    setGeneratedConcept({ ...generatedConcept, shotList: updatedList });
-};
+    const handleUpdateShot = (index: number, field: string, value: string) => {
+        if (!generatedConcept || !generatedConcept.shotList) return;
+        const updatedList = [...generatedConcept.shotList];
+        updatedList[index] = { ...updatedList[index], [field]: value };
+        // If type changed value to MASTER SHOT or vice versa, we should renumber
+        const finalContent = field === 'type' ? renumberShots(updatedList) : updatedList;
+        setGeneratedConcept({ ...generatedConcept, shotList: finalContent });
+    };
 
-// Handler for updating Structure (Escaleta)
-const handleUpdateEscaleta = (index: number, field: 'title' | 'desc', value: string) => {
-    if (!generatedConcept || !generatedConcept.escaleta) return;
-    const newEscaleta = [...generatedConcept.escaleta];
-    newEscaleta[index] = { ...newEscaleta[index], [field]: value };
-    setGeneratedConcept({ ...generatedConcept, escaleta: newEscaleta });
-};
+    // Export PDF Function (Optimized for Legal/Oficio Landscape)
+    const handleExportPDF = async () => {
+        if (!generatedConcept || !generatedConcept.shotList) return;
 
-const handleUpdateShot = (index: number, field: string, value: string) => {
-    if (!generatedConcept || !generatedConcept.shotList) return;
-    const updatedList = [...generatedConcept.shotList];
-    updatedList[index] = { ...updatedList[index], [field]: value };
-    // If type changed value to MASTER SHOT or vice versa, we should renumber
-    const finalContent = field === 'type' ? renumberShots(updatedList) : updatedList;
-    setGeneratedConcept({ ...generatedConcept, shotList: finalContent });
-};
-
-// Export PDF Function (Optimized for Legal/Oficio Landscape)
-const handleExportPDF = async () => {
-    if (!generatedConcept || !generatedConcept.shotList) return;
-
-    try {
-        const jsPDF = (await import('jspdf')).default;
-        const autoTable = (await import('jspdf-autotable')).default;
-
-        // 1. Legal Format (Oficio) - Landscape: 355.6mm width
-        const doc = new jsPDF({ orientation: 'l', unit: 'mm', format: 'legal' });
-        const isEsp = language !== 'en';
-        const pageWidth = doc.internal.pageSize.getWidth();
-
-        // --- HEADER & BRANDING ---
-        // Brand Logo / Name (Top Left)
         try {
-            const logoImg = new Image();
-            logoImg.src = '/at-sit-logo.png';
-            await new Promise((resolve) => { logoImg.onload = resolve; logoImg.onerror = resolve; });
-            doc.addImage(logoImg, 'PNG', 5, 5, 50, 15); // Slightly taller for AT-SIT logo
-        } catch (e) {
-            doc.setFontSize(18);
+            const jsPDF = (await import('jspdf')).default;
+            const autoTable = (await import('jspdf-autotable')).default;
+
+            // 1. Legal Format (Oficio) - Landscape: 355.6mm width
+            const doc = new jsPDF({ orientation: 'l', unit: 'mm', format: 'legal' });
+            const isEsp = language !== 'en';
+            const pageWidth = doc.internal.pageSize.getWidth();
+
+            // --- HEADER & BRANDING ---
+            // Brand Logo / Name (Top Left)
+            try {
+                const logoImg = new Image();
+                logoImg.src = '/at-sit-logo.png';
+                await new Promise((resolve) => { logoImg.onload = resolve; logoImg.onerror = resolve; });
+                doc.addImage(logoImg, 'PNG', 5, 5, 50, 15); // Slightly taller for AT-SIT logo
+            } catch (e) {
+                doc.setFontSize(18);
+                doc.setFont("helvetica", "bold");
+                doc.setTextColor(0);
+                doc.text("AT-SIT", 5, 12);
+            }
+
+            doc.setFontSize(8);
+            doc.setTextColor(100);
+            const subTitle = isEsp ? "INTEGRACIÓN TECNOLÓGICA" : "TECHNOLOGICAL INTEGRATION";
+            doc.text(subTitle, 5, 24); // Adjusted Y for new logo height
+
+            // Timestamp (Top Right)
+            const now = new Date();
+            const dateStr = now.toLocaleDateString() + " " + now.toLocaleTimeString();
+            doc.setFontSize(8);
+            doc.setTextColor(150);
+            doc.text(dateStr, pageWidth - 5, 10, { align: 'right' });
+
+            // Project Title (Center-ish / Below Header)
+            doc.setFontSize(24);
             doc.setFont("helvetica", "bold");
             doc.setTextColor(0);
-            doc.text("AT-SIT", 5, 12);
-        }
+            doc.text(generatedConcept.title, 5, 40); // Moved down significantly to clear logo
 
-        doc.setFontSize(8);
-        doc.setTextColor(100);
-        const subTitle = isEsp ? "INTEGRACIÓN TECNOLÓGICA" : "TECHNOLOGICAL INTEGRATION";
-        doc.text(subTitle, 5, 24); // Adjusted Y for new logo height
+            // Logline
+            doc.setFontSize(10);
+            doc.setFont("helvetica", "italic");
+            doc.setTextColor(80);
+            const splitLogline = doc.splitTextToSize(generatedConcept.logline, pageWidth - 10);
+            doc.text(splitLogline, 5, 50);
 
-        // Timestamp (Top Right)
-        const now = new Date();
-        const dateStr = now.toLocaleDateString() + " " + now.toLocaleTimeString();
-        doc.setFontSize(8);
-        doc.setTextColor(150);
-        doc.text(dateStr, pageWidth - 5, 10, { align: 'right' });
+            // Director's Note
+            let currentY = 50 + (splitLogline.length * 4) + 4;
+            if (advisorNote) {
+                doc.setFontSize(8);
+                doc.setFont("helvetica", "normal");
+                doc.setTextColor(60);
+                const notePrefix = isEsp ? "NOTA:" : "NOTE:";
+                const noteText = `${notePrefix} ${advisorNote}`;
+                const splitNote = doc.splitTextToSize(noteText, pageWidth - 10);
+                doc.text(splitNote, 5, currentY);
+                currentY += (splitNote.length * 3) + 4;
+            } else {
+                currentY += 2;
+            }
 
-        // Project Title (Center-ish / Below Header)
-        doc.setFontSize(24);
-        doc.setFont("helvetica", "bold");
-        doc.setTextColor(0);
-        doc.text(generatedConcept.title, 5, 40); // Moved down significantly to clear logo
+            // --- TABLE ---
+            const tableColumn = isEsp
+                ? ["#", "Esc", "Tiempo", "Tipo", "Lente", "Acción / Descripción", "Detalles Técnicos", "Audio", "Utilería", "Cast", "Notas", "Storyboard"]
+                : ["#", "Sc", "Time", "Type", "Lens", "Action / Description", "Technical Details", "Audio", "Props", "Cast", "Notes", "Storyboard"];
 
-        // Logline
-        doc.setFontSize(10);
-        doc.setFont("helvetica", "italic");
-        doc.setTextColor(80);
-        const splitLogline = doc.splitTextToSize(generatedConcept.logline, pageWidth - 10);
-        doc.text(splitLogline, 5, 50);
+            const tableRows = generatedConcept.shotList.map(shot => [
+                shot.id,
+                shot.scene || "",
+                shot.time,
+                shot.type,
+                shot.lens,
+                shot.subject + (shot.description_detail ? `\n\n${shot.description_detail}` : ""), // Merged Action & Desc for better space
+                (shot.detail_shot || "") + (shot.detail_shot ? "\n" : "") + (isEsp ? "Mvt: " : "Mov: ") + (pacing > 70 ? "Handheld" : "Static"), // Tech column
+                shot.audio,
+                shot.props || "",
+                shot.actors || "",
+                shot.note,
+                "" // Empty space for drawing
+            ]);
 
-        // Director's Note
-        let currentY = 50 + (splitLogline.length * 4) + 4;
-        if (advisorNote) {
-            doc.setFontSize(8);
-            doc.setFont("helvetica", "normal");
-            doc.setTextColor(60);
-            const notePrefix = isEsp ? "NOTA:" : "NOTE:";
-            const noteText = `${notePrefix} ${advisorNote}`;
-            const splitNote = doc.splitTextToSize(noteText, pageWidth - 10);
-            doc.text(splitNote, 5, currentY);
-            currentY += (splitNote.length * 3) + 4;
-        } else {
-            currentY += 2;
-        }
+            autoTable(doc, {
+                startY: currentY,
+                head: [tableColumn],
+                body: tableRows,
+                styles: {
+                    fontSize: 7,
+                    cellPadding: 2,
+                    minCellHeight: 45, // Big square for drawing
+                    valign: 'middle',
+                    overflow: 'linebreak',
+                    lineWidth: 0.1,
+                    lineColor: [220, 220, 220]
+                },
+                columnStyles: {
+                    0: { cellWidth: 10 }, // #
+                    1: { cellWidth: 8 },  // Esc
+                    2: { cellWidth: 18 }, // Time (Wider)
+                    3: { cellWidth: 20 }, // Type
+                    4: { cellWidth: 12 }, // Lens
+                    5: { cellWidth: 50 }, // Action
+                    6: { cellWidth: 30 }, // Tech
+                    7: { cellWidth: 25 }, // Audio
+                    8: { cellWidth: 20 }, // Props
+                    9: { cellWidth: 20 }, // Cast
+                    10: { cellWidth: 25 }, // Notes
+                    11: { cellWidth: 'auto' } // Storyboard takes remaining space (approx 100mm+)
+                },
+                headStyles: {
+                    fillColor: [23, 23, 23],
+                    textColor: [245, 158, 11], // Amber 500
+                    fontStyle: 'bold',
+                    halign: 'center'
+                },
+                alternateRowStyles: { fillColor: [248, 248, 248] },
+                margin: { left: 5, right: 5, top: 15, bottom: 5 },
+                tableWidth: 'auto',
+                didDrawCell: (data) => {
+                    // Check if we are in the Storyboard column (index 11) and it's the body section
+                    if (data.section === 'body' && data.column.index === 11) {
+                        const rowIndex = data.row.index;
+                        const shot = generatedConcept.shotList[rowIndex];
 
-        // --- TABLE ---
-        const tableColumn = isEsp
-            ? ["#", "Esc", "Tiempo", "Tipo", "Lente", "Acción / Descripción", "Detalles Técnicos", "Audio", "Utilería", "Cast", "Notas", "Storyboard"]
-            : ["#", "Sc", "Time", "Type", "Lens", "Action / Description", "Technical Details", "Audio", "Props", "Cast", "Notes", "Storyboard"];
+                        if (shot && shot.storyboardImage) {
+                            try {
+                                // Calculate dimensions to fit in cell while maintaining aspect ratio
+                                // cell width is auto... roughly 100mm? Let's check dimensions of cell
+                                const cellWidth = data.cell.width;
+                                const cellHeight = data.cell.height;
 
-        const tableRows = generatedConcept.shotList.map(shot => [
-            shot.id,
-            shot.scene || "",
-            shot.time,
-            shot.type,
-            shot.lens,
-            shot.subject + (shot.description_detail ? `\n\n${shot.description_detail}` : ""), // Merged Action & Desc for better space
-            (shot.detail_shot || "") + (shot.detail_shot ? "\n" : "") + (isEsp ? "Mvt: " : "Mov: ") + (pacing > 70 ? "Handheld" : "Static"), // Tech column
-            shot.audio,
-            shot.props || "",
-            shot.actors || "",
-            shot.note,
-            "" // Empty space for drawing
-        ]);
+                                // Padding
+                                const padx = 2;
+                                const pady = 2;
 
-        autoTable(doc, {
-            startY: currentY,
-            head: [tableColumn],
-            body: tableRows,
-            styles: {
-                fontSize: 7,
-                cellPadding: 2,
-                minCellHeight: 45, // Big square for drawing
-                valign: 'middle',
-                overflow: 'linebreak',
-                lineWidth: 0.1,
-                lineColor: [220, 220, 220]
-            },
-            columnStyles: {
-                0: { cellWidth: 10 }, // #
-                1: { cellWidth: 8 },  // Esc
-                2: { cellWidth: 18 }, // Time (Wider)
-                3: { cellWidth: 20 }, // Type
-                4: { cellWidth: 12 }, // Lens
-                5: { cellWidth: 50 }, // Action
-                6: { cellWidth: 30 }, // Tech
-                7: { cellWidth: 25 }, // Audio
-                8: { cellWidth: 20 }, // Props
-                9: { cellWidth: 20 }, // Cast
-                10: { cellWidth: 25 }, // Notes
-                11: { cellWidth: 'auto' } // Storyboard takes remaining space (approx 100mm+)
-            },
-            headStyles: {
-                fillColor: [23, 23, 23],
-                textColor: [245, 158, 11], // Amber 500
-                fontStyle: 'bold',
-                halign: 'center'
-            },
-            alternateRowStyles: { fillColor: [248, 248, 248] },
-            margin: { left: 5, right: 5, top: 15, bottom: 5 },
-            tableWidth: 'auto',
-            didDrawCell: (data) => {
-                // Check if we are in the Storyboard column (index 11) and it's the body section
-                if (data.section === 'body' && data.column.index === 11) {
-                    const rowIndex = data.row.index;
-                    const shot = generatedConcept.shotList[rowIndex];
-
-                    if (shot && shot.storyboardImage) {
-                        try {
-                            // Calculate dimensions to fit in cell while maintaining aspect ratio
-                            // cell width is auto... roughly 100mm? Let's check dimensions of cell
-                            const cellWidth = data.cell.width;
-                            const cellHeight = data.cell.height;
-
-                            // Padding
-                            const padx = 2;
-                            const pady = 2;
-
-                            doc.addImage(shot.storyboardImage, 'JPEG', data.cell.x + padx, data.cell.y + pady, cellWidth - (padx * 2), cellHeight - (pady * 2));
-                        } catch (err) {
-                            // Fail silently if image is bad
+                                doc.addImage(shot.storyboardImage, 'JPEG', data.cell.x + padx, data.cell.y + pady, cellWidth - (padx * 2), cellHeight - (pady * 2));
+                            } catch (err) {
+                                // Fail silently if image is bad
+                            }
                         }
                     }
                 }
-            }
-        });
-
-    }
             });
 
-// --- INJECT HIDDEN STATE FOR "TIME TRAVEL" RESTORE ---
-// We encode the full state object into a hidden string at the end of the PDF
-// This allows the app to fully reconstruct the project when this PDF is uploaded back
-try {
-    const fullState = {
-        generatedConcept,
-        scriptText,
-        pacing,
-        contrast,
-        sceneCount
-    };
-    // Use encodeURIComponent to ensure characters are safe, but PDF text might break huge strings
-    // We'll write it as white text (invisible) at the very bottom of the last page
-    doc.addPage(); // Add a dedicated metadata page to avoid layout issues
-    doc.setFontSize(1);
-    doc.setTextColor(255, 255, 255); // White on White
+        }
+            });
 
-    const jsonStr = JSON.stringify(fullState);
-    const safeStr = encodeURIComponent(jsonStr);
+    // --- INJECT HIDDEN STATE FOR "TIME TRAVEL" RESTORE ---
+    // We encode the full state object into a hidden string at the end of the PDF
+    // This allows the app to fully reconstruct the project when this PDF is uploaded back
+    try {
+        const fullState = {
+            generatedConcept,
+            scriptText,
+            pacing,
+            contrast,
+            sceneCount
+        };
+        // Use encodeURIComponent to ensure characters are safe, but PDF text might break huge strings
+        // We'll write it as white text (invisible) at the very bottom of the last page
+        doc.addPage(); // Add a dedicated metadata page to avoid layout issues
+        doc.setFontSize(1);
+        doc.setTextColor(255, 255, 255); // White on White
 
-    // Write marker + data + endmarker
-    const metaString = `ATSIT_STATE_START${safeStr}ATSIT_STATE_END`;
+        const jsonStr = JSON.stringify(fullState);
+        const safeStr = encodeURIComponent(jsonStr);
 
-    // Split into chunks if too long for one line (though addPage helps)
-    const chunks = doc.splitTextToSize(metaString, pageWidth - 10);
-    doc.text(chunks, 5, 5);
+        // Write marker + data + endmarker
+        const metaString = `ATSIT_STATE_START${safeStr}ATSIT_STATE_END`;
 
-    doc.setFontSize(8);
-    doc.setTextColor(200);
-    doc.text("AT-SIT RESTORE DATA - DO NOT REMOVE PAGE", 5, 20);
-} catch (e) {
-    console.error("Could not inject hydratation data", e);
-}
+        // Split into chunks if too long for one line (though addPage helps)
+        const chunks = doc.splitTextToSize(metaString, pageWidth - 10);
+        doc.text(chunks, 5, 5);
 
-doc.save(`Script_${generatedConcept.title.replace(/[^a-z0-9]/gi, '_')}_AT-SIT.pdf`);
+        doc.setFontSize(8);
+        doc.setTextColor(200);
+        doc.text("AT-SIT RESTORE DATA - DO NOT REMOVE PAGE", 5, 20);
+    } catch (e) {
+        console.error("Could not inject hydratation data", e);
+    }
 
-        } catch (error) {
+    doc.save(`Script_${generatedConcept.title.replace(/[^a-z0-9]/gi, '_')}_AT-SIT.pdf`);
+
+} catch (error) {
     console.error("Error generating PDF:", error);
     alert(language === 'en' ? "Error generating PDF" : "Error al generar el PDF");
 }
@@ -1464,9 +1460,9 @@ return (
                                         </button>
                                     </div>
                                 </>
-                                                    )}
                             </div>
                                             ))}
+
                             <div className="flex justify-center pt-8 pb-4 gap-4">
                                 <button
                                     onClick={() => handleAddSceneAt((generatedConcept.shotList?.length || 1) - 1)}
@@ -1504,10 +1500,8 @@ return (
                         : 'Introduce tu visión a la izquierda y genera un desglose de proyecto completo.'}
                 </p>
             </div>
-                        )}
+            )}
         </div>
-    </div>
-            </div >
-        </main >
-    );
+    </main>
+);
 }

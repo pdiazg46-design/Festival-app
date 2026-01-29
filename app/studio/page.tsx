@@ -502,7 +502,7 @@ export default function StudioPage() {
 
             doc.setFontSize(8);
             doc.setTextColor(100);
-            doc.text("PRODUCTION STUDIO", 5, 14);
+            doc.text("PRODUCTION STUDIO", 5, 22);
 
             // Timestamp (Top Right)
             const now = new Date();

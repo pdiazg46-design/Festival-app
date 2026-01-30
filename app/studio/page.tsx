@@ -1421,6 +1421,19 @@ export default function StudioPage() {
                                                                 </div>
                                                             </div>
 
+                                                            {/* Storyboard Image Display */}
+                                                            {shot.storyboardImage && (
+                                                                <div className="w-48 shrink-0">
+                                                                    <div className="relative aspect-video rounded-lg overflow-hidden border border-neutral-800 bg-black">
+                                                                        <img
+                                                                            src={shot.storyboardImage}
+                                                                            alt="Storyboard"
+                                                                            className="w-full h-full object-cover"
+                                                                        />
+                                                                    </div>
+                                                                </div>
+                                                            )}
+
                                                             {/* Action Buttons */}
                                                             <div className="flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity translate-x-4 group-hover:translate-x-0">
                                                                 <div className="flex flex-col gap-1 bg-neutral-900 border border-neutral-800 rounded-lg p-1">

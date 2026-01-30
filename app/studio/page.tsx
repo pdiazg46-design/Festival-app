@@ -543,6 +543,7 @@ export default function StudioPage() {
 
         reader.onloadend = () => {
             const base64String = reader.result as string;
+            if (!generatedConcept?.shotList) return;
             const updatedList = [...generatedConcept.shotList];
             updatedList[index] = { ...updatedList[index], storyboardImage: base64String };
             setGeneratedConcept({ ...generatedConcept, shotList: updatedList });

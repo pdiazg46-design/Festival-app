@@ -703,7 +703,7 @@ export default function StudioPage() {
                     // Check if we are in the Storyboard column (index 11) and it's the body section
                     if (data.section === 'body' && data.column.index === 11) {
                         const rowIndex = data.row.index;
-                        const shot = generatedConcept.shotList[rowIndex];
+                        const shot = generatedConcept.shotList?.[rowIndex];
 
                         if (shot && shot.storyboardImage) {
                             try {

@@ -724,478 +724,476 @@ export default function StudioPage() {
                 }
             });
 
+
+            // --- INJECT HIDDEN STATE FOR "TIME TRAVEL" RESTORE ---
+            // We encode the full state object into a hidden string at the end of the PDF
+            // This allows the app to fully reconstruct the project when this PDF is uploaded back
+            try {
+                const fullState = {
+                    generatedConcept,
+                    scriptText,
+                    pacing,
+                    contrast,
+                    sceneCount
+                };
+                // Use encodeURIComponent to ensure characters are safe, but PDF text might break huge strings
+                // We'll write it as white text (invisible) at the very bottom of the last page
+                doc.addPage(); // Add a dedicated metadata page to avoid layout issues
+                doc.setFontSize(1);
+                doc.setTextColor(255, 255, 255); // White on White
+
+                const jsonStr = JSON.stringify(fullState);
+                const safeStr = encodeURIComponent(jsonStr);
+
+                // Write marker + data + endmarker
+                const metaString = `ATSIT_STATE_START${safeStr}ATSIT_STATE_END`;
+
+                // Split into chunks if too long for one line (though addPage helps)
+                const chunks = doc.splitTextToSize(metaString, pageWidth - 10);
+                doc.text(chunks, 5, 5);
+
+                doc.setFontSize(8);
+                doc.setTextColor(200);
+                doc.text("AT-SIT RESTORE DATA - DO NOT REMOVE PAGE", 5, 20);
+            } catch (e) {
+                console.error("Could not inject hydratation data", e);
+            }
+
+            doc.save(`Script_${generatedConcept.title.replace(/[^a-z0-9]/gi, '_')}_AT-SIT.pdf`);
+
+        } catch (error) {
+            console.error("Error generating PDF:", error);
+            alert(language === 'en' ? "Error generating PDF" : "Error al generar el PDF");
         }
-            });
-
-    // --- INJECT HIDDEN STATE FOR "TIME TRAVEL" RESTORE ---
-    // We encode the full state object into a hidden string at the end of the PDF
-    // This allows the app to fully reconstruct the project when this PDF is uploaded back
-    try {
-        const fullState = {
-            generatedConcept,
-            scriptText,
-            pacing,
-            contrast,
-            sceneCount
-        };
-        // Use encodeURIComponent to ensure characters are safe, but PDF text might break huge strings
-        // We'll write it as white text (invisible) at the very bottom of the last page
-        doc.addPage(); // Add a dedicated metadata page to avoid layout issues
-        doc.setFontSize(1);
-        doc.setTextColor(255, 255, 255); // White on White
-
-        const jsonStr = JSON.stringify(fullState);
-        const safeStr = encodeURIComponent(jsonStr);
-
-        // Write marker + data + endmarker
-        const metaString = `ATSIT_STATE_START${safeStr}ATSIT_STATE_END`;
-
-        // Split into chunks if too long for one line (though addPage helps)
-        const chunks = doc.splitTextToSize(metaString, pageWidth - 10);
-        doc.text(chunks, 5, 5);
-
-        doc.setFontSize(8);
-        doc.setTextColor(200);
-        doc.text("AT-SIT RESTORE DATA - DO NOT REMOVE PAGE", 5, 20);
-    } catch (e) {
-        console.error("Could not inject hydratation data", e);
-    }
-
-    doc.save(`Script_${generatedConcept.title.replace(/[^a-z0-9]/gi, '_')}_AT-SIT.pdf`);
-
-} catch (error) {
-    console.error("Error generating PDF:", error);
-    alert(language === 'en' ? "Error generating PDF" : "Error al generar el PDF");
-}
     };
 
-// Base Script Data (The "Silent Mode" Project) - This is replaced by getDetailedScript
-const baseScript = (isEsp: boolean, vision: string) => ({
-    title: isEsp ? "MODO SILENCIO" : "SILENT MODE",
-    logline: isEsp
-        ? `Un joven intenta cenar con su madre, pero descubre que ella solo responde a través de mensajes de texto. La realidad física se deteriora.${vision ? ` (Idea: ${vision})` : ''}`
-        : `A young man tries to have dinner with his mother, but discovers she only responds via text messages. Physical reality decays.${vision ? ` (Idea: ${vision})` : ''}`,
-    ref: "Ref: 'Black Mirror', 'Hereditary'.",
-    escaleta: [
-        { time: "0-2 min", title: isEsp ? "La Espera" : "The Wait", desc: isEsp ? "Lucas prepara dinner. Absolute silence." : "Lucas prepares dinner. Absolute silence." },
-        { time: "2-4 min", title: isEsp ? "Conexión Perdida" : "Lost Connection", desc: isEsp ? "Madre entra. No habla. Solo responde por WhatsApp." : "Mother enters. Doesn't speak. Only answers via WhatsApp." },
-        { time: "4-7 min", title: isEsp ? "La Glitch" : "The Glitch", desc: isEsp ? "Lucas ve a través de su cámara que su madre sonríe falsamente." : "Lucas sees through his camera that his mother is smiling falsely." },
-        { time: "9-10 min", title: isEsp ? "Rendición" : "Surrender", desc: isEsp ? "Lucas accepts the simulation." : "Lucas accepts the simulation." }
-    ],
-    shotList: [
-        { id: 1, type: isEsp ? "Detalle" : "Detail", subject: isEsp ? "Vapor de la sopa" : "Soup Steam", note: isEsp ? "Audio ASMR" : "ASMR Audio" },
-        { id: 2, type: isEsp ? "General" : "Wide", subject: isEsp ? "Comedor oscuro" : "Dark Dining Room", note: isEsp ? "Aislamiento" : "Isolation" },
-        { id: 3, type: isEsp ? "Medio" : "Medium", subject: isEsp ? "Madre con celular" : "Mother with phone", note: isEsp ? "Luz Azul" : "Blue Light" },
-        { id: 4, type: isEsp ? "POV" : "POV", subject: isEsp ? "Pantalla de Lucas" : "Lucas' Screen", note: isEsp ? "Filtro Feliz" : "Happy Filter" },
-        { id: 5, type: isEsp ? "Primer Plano" : "Close Up", subject: isEsp ? "Reacción Lucas" : "Lucas Reaction", note: isEsp ? "Terror" : "Terror" },
-    ]
-});
+    // Base Script Data (The "Silent Mode" Project) - This is replaced by getDetailedScript
+    const baseScript = (isEsp: boolean, vision: string) => ({
+        title: isEsp ? "MODO SILENCIO" : "SILENT MODE",
+        logline: isEsp
+            ? `Un joven intenta cenar con su madre, pero descubre que ella solo responde a través de mensajes de texto. La realidad física se deteriora.${vision ? ` (Idea: ${vision})` : ''}`
+            : `A young man tries to have dinner with his mother, but discovers she only responds via text messages. Physical reality decays.${vision ? ` (Idea: ${vision})` : ''}`,
+        ref: "Ref: 'Black Mirror', 'Hereditary'.",
+        escaleta: [
+            { time: "0-2 min", title: isEsp ? "La Espera" : "The Wait", desc: isEsp ? "Lucas prepara dinner. Absolute silence." : "Lucas prepares dinner. Absolute silence." },
+            { time: "2-4 min", title: isEsp ? "Conexión Perdida" : "Lost Connection", desc: isEsp ? "Madre entra. No habla. Solo responde por WhatsApp." : "Mother enters. Doesn't speak. Only answers via WhatsApp." },
+            { time: "4-7 min", title: isEsp ? "La Glitch" : "The Glitch", desc: isEsp ? "Lucas ve a través de su cámara que su madre sonríe falsamente." : "Lucas sees through his camera that his mother is smiling falsely." },
+            { time: "9-10 min", title: isEsp ? "Rendición" : "Surrender", desc: isEsp ? "Lucas accepts the simulation." : "Lucas accepts the simulation." }
+        ],
+        shotList: [
+            { id: 1, type: isEsp ? "Detalle" : "Detail", subject: isEsp ? "Vapor de la sopa" : "Soup Steam", note: isEsp ? "Audio ASMR" : "ASMR Audio" },
+            { id: 2, type: isEsp ? "General" : "Wide", subject: isEsp ? "Comedor oscuro" : "Dark Dining Room", note: isEsp ? "Aislamiento" : "Isolation" },
+            { id: 3, type: isEsp ? "Medio" : "Medium", subject: isEsp ? "Madre con celular" : "Mother with phone", note: isEsp ? "Luz Azul" : "Blue Light" },
+            { id: 4, type: isEsp ? "POV" : "POV", subject: isEsp ? "Pantalla de Lucas" : "Lucas' Screen", note: isEsp ? "Filtro Feliz" : "Happy Filter" },
+            { id: 5, type: isEsp ? "Primer Plano" : "Close Up", subject: isEsp ? "Reacción Lucas" : "Lucas Reaction", note: isEsp ? "Terror" : "Terror" },
+        ]
+    });
 
-// This function is no longer used as the refinement logic is removed
-const applyRefinement = (type: 'arthouse' | 'horror' | 'budget') => {
-    if (!generatedConcept) return;
-    const isEsp = language !== 'en';
-    let newScript = { ...generatedConcept };
+    // This function is no longer used as the refinement logic is removed
+    const applyRefinement = (type: 'arthouse' | 'horror' | 'budget') => {
+        if (!generatedConcept) return;
+        const isEsp = language !== 'en';
+        let newScript = { ...generatedConcept };
 
-    if (type === 'arthouse') {
-        newScript.title = isEsp ? "SILENCIO_01" : "SILENCE_01";
-        newScript.logline = isEsp ? "Sin diálogos. Una exploración visual de la desconexión." : "No dialogue. A visual exploration of disconnection.";
-        newScript.escaleta![1].desc = isEsp ? "Madre entra. Lucas intenta hablar. Ella sube el volumen de su música." : "Mother enters. Lucas tries to speak. She turns up her music.";
-        newScript.shotList = [
-            { id: 1, type: isEsp ? "Plano Secuencia (2 min)" : "Sequence Shot (2 min)", subject: isEsp ? "La cena completa sin cortes" : "Entire dinner without cuts", note: isEsp ? "Estilo Haneke. Tensión estática." : "Haneke style. Static tension." },
-            { id: 2, type: isEsp ? "Detalle Extremo" : "Extreme Detail", subject: isEsp ? "Ojo de la madre no parpadea" : "Mother's eye doesn't blink", note: "Macro lens." },
-            { id: 3, type: isEsp ? "General Distante" : "Distant Wide", subject: isEsp ? "Ambos en extremos de la mesa" : "Both at ends of the table", note: isEsp ? "Simetría perfecta." : "Perfect symmetry." }
-        ];
-        setAdvisorNote(isEsp
-            ? "💡 ESTRATEGIA: El 'Cine Lento' tiene un 40% más de probabilidad de selección en festivales Clase A (Cannes/Berlin) que el terror convencional."
-            : "💡 STRATEGY: 'Slow Cinema' has a 40% higher selection rate in Class A festivals than conventional horror.");
-        setRefinementStep(1);
-    }
+        if (type === 'arthouse') {
+            newScript.title = isEsp ? "SILENCIO_01" : "SILENCE_01";
+            newScript.logline = isEsp ? "Sin diálogos. Una exploración visual de la desconexión." : "No dialogue. A visual exploration of disconnection.";
+            newScript.escaleta![1].desc = isEsp ? "Madre entra. Lucas intenta hablar. Ella sube el volumen de su música." : "Mother enters. Lucas tries to speak. She turns up her music.";
+            newScript.shotList = [
+                { id: 1, type: isEsp ? "Plano Secuencia (2 min)" : "Sequence Shot (2 min)", subject: isEsp ? "La cena completa sin cortes" : "Entire dinner without cuts", note: isEsp ? "Estilo Haneke. Tensión estática." : "Haneke style. Static tension." },
+                { id: 2, type: isEsp ? "Detalle Extremo" : "Extreme Detail", subject: isEsp ? "Ojo de la madre no parpadea" : "Mother's eye doesn't blink", note: "Macro lens." },
+                { id: 3, type: isEsp ? "General Distante" : "Distant Wide", subject: isEsp ? "Ambos en extremos de la mesa" : "Both at ends of the table", note: isEsp ? "Simetría perfecta." : "Perfect symmetry." }
+            ];
+            setAdvisorNote(isEsp
+                ? "💡 ESTRATEGIA: El 'Cine Lento' tiene un 40% más de probabilidad de selección en festivales Clase A (Cannes/Berlin) que el terror convencional."
+                : "💡 STRATEGY: 'Slow Cinema' has a 40% higher selection rate in Class A festivals than conventional horror.");
+            setRefinementStep(1);
+        }
 
-    if (type === 'horror') {
-        newScript.title = isEsp ? "NOTIFICACIÓN FINAL" : "FINAL NOTIFICATION";
-        newScript.logline = isEsp ? "La adicción se vuelve posesión demoníaca digital." : "Addiction becomes digital demonic possession.";
-        newScript.escaleta![3].desc = isEsp ? "La madre empieza a sangrar píxeles negros por los ojos." : "Mother starts bleeding black pixels from her eyes.";
-        newScript.shotList!.push({ id: 6, type: "Dutch Angle", subject: isEsp ? "Madre gritando estática" : "Mother screaming static", note: isEsp ? "Distorsión de lente." : "Lens distortion." });
-        setAdvisorNote(isEsp
-            ? "🩸 ESTRATEGIA: Para Sitges/Midnight, el impacto visual final lo es todo. Sacrificamos sutileza por memorabilidad."
-            : "🩸 STRATEGY: For Sitges/Midnight, the final visual impact is everything. We sacrifice subtlety for memorability.");
-        setRefinementStep(2);
-    }
+        if (type === 'horror') {
+            newScript.title = isEsp ? "NOTIFICACIÓN FINAL" : "FINAL NOTIFICATION";
+            newScript.logline = isEsp ? "La adicción se vuelve posesión demoníaca digital." : "Addiction becomes digital demonic possession.";
+            newScript.escaleta![3].desc = isEsp ? "La madre empieza a sangrar píxeles negros por los ojos." : "Mother starts bleeding black pixels from her eyes.";
+            newScript.shotList!.push({ id: 6, type: "Dutch Angle", subject: isEsp ? "Madre gritando estática" : "Mother screaming static", note: isEsp ? "Distorsión de lente." : "Lens distortion." });
+            setAdvisorNote(isEsp
+                ? "🩸 ESTRATEGIA: Para Sitges/Midnight, el impacto visual final lo es todo. Sacrificamos sutileza por memorabilidad."
+                : "🩸 STRATEGY: For Sitges/Midnight, the final visual impact is everything. We sacrifice subtlety for memorability.");
+            setRefinementStep(2);
+        }
 
-    if (type === 'budget') {
-        newScript.title = isEsp ? "MODO SILENCIO (Low Cost)" : "SILENT MODE (Low Cost)";
-        newScript.shotList = [
-            { id: 1, type: isEsp ? "Trípode Fijo" : "Fixed Tripod", subject: isEsp ? "Toda la acción en un plano" : "All action in one shot", note: isEsp ? "Sin operador de cámara necesario." : "No camera operator needed." },
-            { id: 2, type: isEsp ? "POV Celular" : "Phone POV", subject: isEsp ? "Grabado con el mismo teléfono" : "Shot with the same phone", note: isEsp ? "Estilo Found Footage." : "Found Footage style." }
-        ];
-        setAdvisorNote(isEsp
-            ? "💰 ESTRATEGIA: Menos cortes = Menos días de rodaje. 'Tangerine' ganó Sundance grabada solo con iPhones."
-            : "💰 STRATEGY: Fewer cuts = Fewer shooting days. 'Tangerine' won Sundance shot entirely on iPhones.");
-        setRefinementStep(3);
-    }
+        if (type === 'budget') {
+            newScript.title = isEsp ? "MODO SILENCIO (Low Cost)" : "SILENT MODE (Low Cost)";
+            newScript.shotList = [
+                { id: 1, type: isEsp ? "Trípode Fijo" : "Fixed Tripod", subject: isEsp ? "Toda la acción en un plano" : "All action in one shot", note: isEsp ? "Sin operador de cámara necesario." : "No camera operator needed." },
+                { id: 2, type: isEsp ? "POV Celular" : "Phone POV", subject: isEsp ? "Grabado con el mismo teléfono" : "Shot with the same phone", note: isEsp ? "Estilo Found Footage." : "Found Footage style." }
+            ];
+            setAdvisorNote(isEsp
+                ? "💰 ESTRATEGIA: Menos cortes = Menos días de rodaje. 'Tangerine' ganó Sundance grabada solo con iPhones."
+                : "💰 STRATEGY: Fewer cuts = Fewer shooting days. 'Tangerine' won Sundance shot entirely on iPhones.");
+            setRefinementStep(3);
+        }
 
-    setGeneratedConcept(newScript);
-};
+        setGeneratedConcept(newScript);
+    };
 
-return (
-    <main className="min-h-screen bg-neutral-950 text-neutral-100 p-8 font-sans">
-        <LanguageSwitcher />
+    return (
+        <main className="min-h-screen bg-neutral-950 text-neutral-100 p-8 font-sans">
+            <LanguageSwitcher />
 
-        <div className="max-w-7xl mx-auto space-y-8">
-            {/* Header */}
-            <header className="flex items-center gap-4 border-b border-neutral-800 pb-6">
-                <Link href="/" className="p-3 bg-neutral-900 rounded-full hover:bg-neutral-800 transition-colors group">
-                    <ArrowLeft size={24} className="group-hover:-translate-x-1 transition-transform" />
-                </Link>
-                <div>
-                    <div className="flex items-center gap-3">
-                        <Clapperboard className="text-amber-500" size={32} />
-                        <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-amber-200 to-yellow-600">
-                            {language === 'en' ? 'Technical Director Studio' : 'Estudio de Dirección Técnica'}
-                        </h1>
+            <div className="max-w-7xl mx-auto space-y-8">
+                {/* Header */}
+                <header className="flex items-center gap-4 border-b border-neutral-800 pb-6">
+                    <Link href="/" className="p-3 bg-neutral-900 rounded-full hover:bg-neutral-800 transition-colors group">
+                        <ArrowLeft size={24} className="group-hover:-translate-x-1 transition-transform" />
+                    </Link>
+                    <div>
+                        <div className="flex items-center gap-3">
+                            <Clapperboard className="text-amber-500" size={32} />
+                            <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-amber-200 to-yellow-600">
+                                {language === 'en' ? 'Technical Director Studio' : 'Estudio de Dirección Técnica'}
+                            </h1>
+                        </div>
+                        <p className="text-neutral-400 mt-1">
+                            {language === 'en' ? 'Interactive scene breakdown.' : 'Desglose de escena interactivo.'}
+                        </p>
                     </div>
-                    <p className="text-neutral-400 mt-1">
-                        {language === 'en' ? 'Interactive scene breakdown.' : 'Desglose de escena interactivo.'}
-                    </p>
-                </div>
-            </header>
+                </header>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                {/* Left Column: Controls */}
-                <div className="lg:col-span-3 space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    {/* Left Column: Controls */}
+                    <div className="lg:col-span-3 space-y-6">
 
-                    {/* Reset / New Project Button */}
-                    <button
-                        onClick={() => {
-                            if (confirm(language === 'en' ? "Are you sure? This will clear everything." : "¿Estás seguro? Esto borrará todo tu progreso.")) {
-                                localStorage.removeItem("studio_project_data");
-                                setScriptText("");
-                                setCustomVision("");
-                                setGeneratedConcept(null);
-                                setDuration(600);
-                                setSceneCount(3);
-                                setPacing(50);
-                                setContrast(50);
-                                setActiveTab("concept");
-                                setAdvisorNote("");
-                            }
-                        }}
-                        className="w-full py-2 flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider text-neutral-500 hover:text-red-500 border border-neutral-800 hover:border-red-500/50 rounded-lg transition-all mb-2"
-                    >
-                        <Trash2 size={14} />
-                        {language === 'en' ? 'Reset Project' : 'Reiniciar Proyecto'}
-                    </button>
-
-                    {/* Guión Input */}
-                    <section className="bg-neutral-900/50 p-6 rounded-xl border border-neutral-800">
-                        <h2 className="text-sm font-semibold mb-2 flex items-center gap-2 text-neutral-400 uppercase tracking-wider">
-                            {language === 'en' ? 'Screenplay' : 'Guión'}
-                            {isProcessing && <div className="ml-auto animate-spin h-3 w-3 border-2 border-amber-500 border-t-transparent rounded-full" />}
-                        </h2>
-
-                        <div
-                            onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
-                            onDragLeave={() => setIsDragging(false)}
-                            onDrop={handleDrop}
-                            className={cn(
-                                "relative group transition-all duration-300 mb-4",
-                                isDragging ? "scale-[1.02]" : ""
-                            )}
-                        >
-                            <textarea
-                                value={scriptText}
-                                onChange={(e) => setScriptText(e.target.value)}
-                                placeholder={language === 'en' ? "Paste or Drop PDF screenplay..." : "Pega o Arrastra tu guión PDF..."}
-                                className={cn(
-                                    "w-full h-32 bg-neutral-950 border rounded-lg p-3 text-sm text-neutral-100 focus:border-amber-500 outline-none resize-none placeholder:text-neutral-500 transition-colors",
-                                    isDragging ? "border-amber-500 bg-amber-500/10 shadow-[0_0_20px_rgba(245,158,11,0.2)]" : "border-neutral-700"
-                                )}
-                            />
-
-                            {/* File Picker Trigger */}
-                            <label className="absolute bottom-2 right-2 p-1.5 bg-neutral-900 border border-neutral-800 rounded-md cursor-pointer hover:bg-neutral-800 transition-colors text-neutral-400 hover:text-amber-500 group-hover:border-neutral-700 shadow-lg">
-                                <input
-                                    type="file"
-                                    className="hidden"
-                                    accept=".pdf,.txt"
-                                    onChange={async (e) => {
-                                        const file = e.target.files?.[0];
-                                        if (file) {
-                                            if (file.type === "application/pdf") await extractTextFromPDF(file);
-                                            else setScriptText(await file.text());
-                                        }
-                                    }}
-                                />
-                                <Edit2 size={12} />
-                            </label>
-
-                            {isDragging && (
-                                <div className="absolute inset-0 flex items-center justify-center pointer-events-none bg-amber-500/5 backdrop-blur-[1px] rounded-lg border-2 border-dashed border-amber-500">
-                                    <div className="bg-amber-500 text-black px-4 py-2 rounded-full text-xs font-black animate-bounce shadow-xl uppercase tracking-tighter">
-                                        {language === 'en' ? 'Drop PDF Here' : 'Suelta el PDF aquí'}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-
-                        {!scriptText || scriptText.length < 10 ? (
-                            <div className="space-y-3 mb-6 bg-amber-500/5 p-4 rounded-lg border border-amber-500/10">
-                                <h3 className="text-[10px] font-black uppercase text-amber-500/60 tracking-tighter">
-                                    {language === 'en' ? 'Quick Plot Idea (Optional)' : 'Idea Rápida / Sinopsis (Opcional)'}
-                                </h3>
-                                <textarea
-                                    value={customVision}
-                                    onChange={(e) => setCustomVision(e.target.value)}
-                                    placeholder={language === 'en' ? "Short summary if no script provided..." : "Resumen corto si no tienes el guion..."}
-                                    className="w-full h-16 bg-transparent border-none p-0 text-xs text-neutral-300 focus:ring-0 outline-none resize-none placeholder:text-neutral-500"
-                                />
-                            </div>
-                        ) : (
-                            <div className="mb-6 p-3 bg-neutral-950/50 rounded-lg border border-neutral-800 text-[10px] text-neutral-500 italic">
-                                {language === 'en' ? 'Using full screenplay for generation. Quick Plot ignored.' : 'Usando el guión completo para la generación. Idea rápida omitida.'}
-                            </div>
-                        )}
-
-                        {/* Duration Selector */}
-                        <div className="space-y-3 mb-6">
-                            <label className="text-xs text-neutral-400 uppercase font-bold flex flex-wrap items-end justify-between gap-2">
-                                <span>{language === 'en' ? 'Target Duration' : 'Duración Estimada'}</span>
-                                <span className="text-amber-500 bg-neutral-900 px-2 py-0.5 rounded text-[10px] tracking-wide border border-neutral-800">
-                                    {formatTime(duration)}
-                                </span>
-                            </label>
-                            <input
-                                type="range" min="7" max="12600" step="1"
-                                value={duration}
-                                onChange={(e) => setDuration(parseInt(e.target.value))}
-                                className="w-full h-1.5 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-amber-500"
-                            />
-                            <div className="flex justify-between text-[10px] text-neutral-500 italic">
-                                <span>7s (Reels)</span>
-                                <span>210m (Film)</span>
-                            </div>
-                        </div>
-
-                        {/* Scene Count Selector - Conditional */}
-                        {!scriptText || scriptText.length < 10 ? (
-                            <div className="space-y-3 mb-6">
-                                <label className="text-xs text-neutral-400 uppercase font-bold flex justify-between">
-                                    <span>{language === 'en' ? 'Scenes' : 'Escenas'}</span>
-                                    <span className="text-amber-500">{sceneCount}</span>
-                                </label>
-                                <input
-                                    type="range" min="1" max="15" value={sceneCount}
-                                    onChange={(e) => setSceneCount(parseInt(e.target.value))}
-                                    className="w-full h-1.5 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-amber-500"
-                                />
-                                <p className="text-[10px] text-neutral-500 italic">
-                                    {language === 'en' ? 'Determines the number of AI-generated scenes.' : 'Determina el número de escenas generadas por la IA.'}
-                                </p>
-                            </div>
-                        ) : (
-                            <div className="mb-6 space-y-2">
-                                <div className="flex justify-between items-center bg-amber-500/10 p-3 rounded-lg border border-amber-500/20">
-                                    <span className="text-[10px] font-bold text-amber-500 uppercase tracking-widest">{language === 'en' ? 'Auto-Detected Scenes' : 'Escenas Detectadas'}</span>
-                                    <span className="bg-amber-500 text-black text-xs font-black px-2 py-0.5 rounded-full">
-                                        {scriptText.match(/(?:ESC|ESCENA|SCENE)\s*(\d+)/gi)?.length || 1}
-                                    </span>
-                                </div>
-                                <p className="text-[9px] text-neutral-500 px-1">
-                                    {language === 'en' ? 'AI will follow the structure of your script headers.' : 'La IA seguirá la estructura de los encabezados de tu guión.'}
-                                </p>
-                            </div>
-                        )}
-
+                        {/* Reset / New Project Button */}
                         <button
-                            onClick={handleGenerate}
-                            className="w-full py-3 bg-gradient-to-r from-amber-500 to-yellow-600 rounded-lg font-bold text-neutral-950 transition-all hover:shadow-[0_0_15px_rgba(245,158,11,0.3)] text-sm"
+                            onClick={() => {
+                                if (confirm(language === 'en' ? "Are you sure? This will clear everything." : "¿Estás seguro? Esto borrará todo tu progreso.")) {
+                                    localStorage.removeItem("studio_project_data");
+                                    setScriptText("");
+                                    setCustomVision("");
+                                    setGeneratedConcept(null);
+                                    setDuration(600);
+                                    setSceneCount(3);
+                                    setPacing(50);
+                                    setContrast(50);
+                                    setActiveTab("concept");
+                                    setAdvisorNote("");
+                                }
+                            }}
+                            className="w-full py-2 flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider text-neutral-500 hover:text-red-500 border border-neutral-800 hover:border-red-500/50 rounded-lg transition-all mb-2"
                         >
-                            {language === 'en' ? 'Generate Opening Sc.' : 'Generar Apertura'}
+                            <Trash2 size={14} />
+                            {language === 'en' ? 'Reset Project' : 'Reiniciar Proyecto'}
                         </button>
-                    </section>
 
-                    {/* ATMOSPHERE CONTROLS */}
-                    {generatedConcept && (
-                        <section className="bg-neutral-900 p-6 rounded-xl border border-neutral-800 space-y-8 animate-in fade-in slide-in-from-left-4">
-                            <h2 className="text-sm font-bold mb-4 flex items-center gap-2 text-white uppercase tracking-wider border-b border-neutral-800 pb-2">
-                                <Target size={16} className="text-amber-500" />
-                                {language === 'en' ? 'Atmosphere' : 'Atmósfera'}
+                        {/* Guión Input */}
+                        <section className="bg-neutral-900/50 p-6 rounded-xl border border-neutral-800">
+                            <h2 className="text-sm font-semibold mb-2 flex items-center gap-2 text-neutral-400 uppercase tracking-wider">
+                                {language === 'en' ? 'Screenplay' : 'Guión'}
+                                {isProcessing && <div className="ml-auto animate-spin h-3 w-3 border-2 border-amber-500 border-t-transparent rounded-full" />}
                             </h2>
 
-                            {/* Pacing Slider */}
-                            <div className="space-y-3">
-                                <div className="flex justify-between text-xs text-neutral-400 uppercase font-mono">
-                                    <span>{language === 'en' ? 'Slow / Tension' : 'Lento / Tensión'}</span>
-                                    <span>{language === 'en' ? 'Fast / Chaos' : 'Rápido / Caos'}</span>
-                                </div>
-                                <input
-                                    type="range" min="0" max="100" value={pacing}
-                                    onChange={(e) => updateAtmosphere(parseInt(e.target.value), contrast)}
-                                    className="w-full h-2 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-amber-500"
+                            <div
+                                onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                                onDragLeave={() => setIsDragging(false)}
+                                onDrop={handleDrop}
+                                className={cn(
+                                    "relative group transition-all duration-300 mb-4",
+                                    isDragging ? "scale-[1.02]" : ""
+                                )}
+                            >
+                                <textarea
+                                    value={scriptText}
+                                    onChange={(e) => setScriptText(e.target.value)}
+                                    placeholder={language === 'en' ? "Paste or Drop PDF screenplay..." : "Pega o Arrastra tu guión PDF..."}
+                                    className={cn(
+                                        "w-full h-32 bg-neutral-950 border rounded-lg p-3 text-sm text-neutral-100 focus:border-amber-500 outline-none resize-none placeholder:text-neutral-500 transition-colors",
+                                        isDragging ? "border-amber-500 bg-amber-500/10 shadow-[0_0_20px_rgba(245,158,11,0.2)]" : "border-neutral-700"
+                                    )}
                                 />
-                                <div className="text-xs text-center text-amber-500 font-mono">{pacing}% {language === 'en' ? 'Pacing' : 'Ritmo'}</div>
+
+                                {/* File Picker Trigger */}
+                                <label className="absolute bottom-2 right-2 p-1.5 bg-neutral-900 border border-neutral-800 rounded-md cursor-pointer hover:bg-neutral-800 transition-colors text-neutral-400 hover:text-amber-500 group-hover:border-neutral-700 shadow-lg">
+                                    <input
+                                        type="file"
+                                        className="hidden"
+                                        accept=".pdf,.txt"
+                                        onChange={async (e) => {
+                                            const file = e.target.files?.[0];
+                                            if (file) {
+                                                if (file.type === "application/pdf") await extractTextFromPDF(file);
+                                                else setScriptText(await file.text());
+                                            }
+                                        }}
+                                    />
+                                    <Edit2 size={12} />
+                                </label>
+
+                                {isDragging && (
+                                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none bg-amber-500/5 backdrop-blur-[1px] rounded-lg border-2 border-dashed border-amber-500">
+                                        <div className="bg-amber-500 text-black px-4 py-2 rounded-full text-xs font-black animate-bounce shadow-xl uppercase tracking-tighter">
+                                            {language === 'en' ? 'Drop PDF Here' : 'Suelta el PDF aquí'}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
-                            {/* Contrast Slider */}
-                            <div className="space-y-3">
-                                <div className="flex justify-between text-xs text-neutral-400 uppercase font-mono">
-                                    <span>{language === 'en' ? 'Natural' : 'Natural'}</span>
-                                    <span>{language === 'en' ? 'Stylized' : 'Estilizado'}</span>
+                            {!scriptText || scriptText.length < 10 ? (
+                                <div className="space-y-3 mb-6 bg-amber-500/5 p-4 rounded-lg border border-amber-500/10">
+                                    <h3 className="text-[10px] font-black uppercase text-amber-500/60 tracking-tighter">
+                                        {language === 'en' ? 'Quick Plot Idea (Optional)' : 'Idea Rápida / Sinopsis (Opcional)'}
+                                    </h3>
+                                    <textarea
+                                        value={customVision}
+                                        onChange={(e) => setCustomVision(e.target.value)}
+                                        placeholder={language === 'en' ? "Short summary if no script provided..." : "Resumen corto si no tienes el guion..."}
+                                        className="w-full h-16 bg-transparent border-none p-0 text-xs text-neutral-300 focus:ring-0 outline-none resize-none placeholder:text-neutral-500"
+                                    />
                                 </div>
-                                <input
-                                    type="range" min="0" max="100" value={contrast}
-                                    onChange={(e) => updateAtmosphere(pacing, parseInt(e.target.value))}
-                                    className="w-full h-2 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"
-                                />
-                                <div className="text-xs text-center text-indigo-400 font-mono">{contrast}% {language === 'en' ? 'Contrast' : 'Contraste'}</div>
-                            </div>
-                        </section>
-                    )}
-                </div>
-
-                {/* Right Column: The Detailed Shot List */}
-                <div className="lg:col-span-9">
-                    {generatedConcept ? (
-                        <div className="bg-neutral-950 border border-neutral-800 rounded-xl overflow-hidden min-h-[600px] flex flex-col relative">
-
-                            {advisorNote && (
-                                <div className="bg-indigo-500/10 border-b border-indigo-500/20 p-3 text-sm text-indigo-200 flex items-start gap-2">
-                                    <div className="mt-0.5"><Users size={16} /></div>
-                                    <p>{advisorNote}</p>
+                            ) : (
+                                <div className="mb-6 p-3 bg-neutral-950/50 rounded-lg border border-neutral-800 text-[10px] text-neutral-500 italic">
+                                    {language === 'en' ? 'Using full screenplay for generation. Quick Plot ignored.' : 'Usando el guión completo para la generación. Idea rápida omitida.'}
                                 </div>
                             )}
 
-                            {/* Header */}
-                            <div className="p-8 border-b border-neutral-800 bg-neutral-900/30">
-                                <div className="flex justify-between items-end">
-                                    <div>
-                                        <div className="text-amber-500 text-xs font-bold uppercase tracking-widest mb-2 flex items-center gap-2">
-                                            <Film size={14} />
-                                            {language === 'en' ? 'Project Overview' : 'Resumen del Proyecto'}
-                                        </div>
-                                        <input
-                                            value={generatedConcept.title}
-                                            onChange={(e) => setGeneratedConcept({ ...generatedConcept, title: e.target.value })}
-                                            className="text-4xl font-extrabold text-white mb-2 bg-transparent border-none outline-none focus:ring-0 placeholder:text-neutral-700 w-full"
-                                            placeholder="Project Title"
-                                        />
-                                    </div>
+                            {/* Duration Selector */}
+                            <div className="space-y-3 mb-6">
+                                <label className="text-xs text-neutral-400 uppercase font-bold flex flex-wrap items-end justify-between gap-2">
+                                    <span>{language === 'en' ? 'Target Duration' : 'Duración Estimada'}</span>
+                                    <span className="text-amber-500 bg-neutral-900 px-2 py-0.5 rounded text-[10px] tracking-wide border border-neutral-800">
+                                        {formatTime(duration)}
+                                    </span>
+                                </label>
+                                <input
+                                    type="range" min="7" max="12600" step="1"
+                                    value={duration}
+                                    onChange={(e) => setDuration(parseInt(e.target.value))}
+                                    className="w-full h-1.5 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-amber-500"
+                                />
+                                <div className="flex justify-between text-[10px] text-neutral-500 italic">
+                                    <span>7s (Reels)</span>
+                                    <span>210m (Film)</span>
                                 </div>
                             </div>
 
-                            {/* Tabs Navigation */}
-                            <div className="flex border-b border-neutral-800 bg-neutral-900/50 px-8 gap-6">
-                                <button
-                                    onClick={() => setActiveTab('concept')}
-                                    className={cn("py-4 text-sm font-bold border-b-2 transition-colors flex items-center gap-2", activeTab === 'concept' ? "border-amber-500 text-white" : "border-transparent text-neutral-500 hover:text-neutral-300")}
-                                >
-                                    <Sparkles size={14} />
-                                    {language === 'en' ? 'Concept' : 'Concepto'}
-                                </button>
-                                <button
-                                    onClick={() => setActiveTab('structure')}
-                                    className={cn("py-4 text-sm font-bold border-b-2 transition-colors flex items-center gap-2", activeTab === 'structure' ? "border-amber-500 text-white" : "border-transparent text-neutral-500 hover:text-neutral-300")}
-                                >
-                                    <Trophy size={14} />
-                                    {language === 'en' ? 'Structure' : 'Estructura'}
-                                </button>
-                                <button
-                                    onClick={() => setActiveTab('shotlist')}
-                                    className={cn("py-4 text-sm font-bold border-b-2 transition-colors flex items-center gap-2", activeTab === 'shotlist' ? "border-amber-500 text-white" : "border-transparent text-neutral-500 hover:text-neutral-300")}
-                                >
-                                    <Clapperboard size={14} />
-                                    {language === 'en' ? 'Shot List' : 'Guion Técnico'}
-                                </button>
-                            </div>
+                            {/* Scene Count Selector - Conditional */}
+                            {!scriptText || scriptText.length < 10 ? (
+                                <div className="space-y-3 mb-6">
+                                    <label className="text-xs text-neutral-400 uppercase font-bold flex justify-between">
+                                        <span>{language === 'en' ? 'Scenes' : 'Escenas'}</span>
+                                        <span className="text-amber-500">{sceneCount}</span>
+                                    </label>
+                                    <input
+                                        type="range" min="1" max="15" value={sceneCount}
+                                        onChange={(e) => setSceneCount(parseInt(e.target.value))}
+                                        className="w-full h-1.5 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-amber-500"
+                                    />
+                                    <p className="text-[10px] text-neutral-500 italic">
+                                        {language === 'en' ? 'Determines the number of AI-generated scenes.' : 'Determina el número de escenas generadas por la IA.'}
+                                    </p>
+                                </div>
+                            ) : (
+                                <div className="mb-6 space-y-2">
+                                    <div className="flex justify-between items-center bg-amber-500/10 p-3 rounded-lg border border-amber-500/20">
+                                        <span className="text-[10px] font-bold text-amber-500 uppercase tracking-widest">{language === 'en' ? 'Auto-Detected Scenes' : 'Escenas Detectadas'}</span>
+                                        <span className="bg-amber-500 text-black text-xs font-black px-2 py-0.5 rounded-full">
+                                            {scriptText.match(/(?:ESC|ESCENA|SCENE)\s*(\d+)/gi)?.length || 1}
+                                        </span>
+                                    </div>
+                                    <p className="text-[9px] text-neutral-500 px-1">
+                                        {language === 'en' ? 'AI will follow the structure of your script headers.' : 'La IA seguirá la estructura de los encabezados de tu guión.'}
+                                    </p>
+                                </div>
+                            )}
 
-                            {/* Content Area */}
-                            <div className="p-8 space-y-4 overflow-y-auto bg-neutral-950 flex-1">
+                            <button
+                                onClick={handleGenerate}
+                                className="w-full py-3 bg-gradient-to-r from-amber-500 to-yellow-600 rounded-lg font-bold text-neutral-950 transition-all hover:shadow-[0_0_15px_rgba(245,158,11,0.3)] text-sm"
+                            >
+                                {language === 'en' ? 'Generate Opening Sc.' : 'Generar Apertura'}
+                            </button>
+                        </section>
 
-                                {/* CONCEPT TAB */}
-                                {activeTab === 'concept' && (
-                                    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2">
-                                        <div>
-                                            <h3 className="text-neutral-500 text-sm font-mono uppercase mb-2">Logline</h3>
-                                            <p className="text-2xl text-white leading-relaxed font-serif italic border-l-4 border-amber-500 pl-4">
-                                                "{generatedConcept.logline}"
-                                            </p>
-                                        </div>
-                                        <div>
-                                            <h3 className="text-neutral-500 text-sm font-mono uppercase mb-2">{language === 'en' ? 'Visual References' : 'Referencias Visuales'}</h3>
-                                            <p className="text-neutral-300">{generatedConcept.ref}</p>
-                                        </div>
-                                        <div className="p-5 bg-emerald-900/10 border border-emerald-900/30 rounded-xl">
-                                            <h3 className="text-emerald-500 text-sm font-bold mb-2 flex items-center gap-2">
-                                                <Target size={14} />
-                                                {language === 'en' ? 'Director\'s Note' : 'Nota del Director'}
-                                            </h3>
-                                            <p className="text-emerald-200/80 text-sm leading-relaxed">
-                                                {language === 'en'
-                                                    ? "The structure focuses on establishing atmosphere before introducing the central conflict. This slow-burn approach is highly effective for festival circuits like Sundance or Berlin."
-                                                    : "La estructura se centra en establecer la atmósfera antes de introducir el conflicto central. Este enfoque 'slow-burn' es muy efectivo para circuitos de festivales como Sundance o Berlín."}
-                                            </p>
-                                        </div>
+                        {/* ATMOSPHERE CONTROLS */}
+                        {generatedConcept && (
+                            <section className="bg-neutral-900 p-6 rounded-xl border border-neutral-800 space-y-8 animate-in fade-in slide-in-from-left-4">
+                                <h2 className="text-sm font-bold mb-4 flex items-center gap-2 text-white uppercase tracking-wider border-b border-neutral-800 pb-2">
+                                    <Target size={16} className="text-amber-500" />
+                                    {language === 'en' ? 'Atmosphere' : 'Atmósfera'}
+                                </h2>
+
+                                {/* Pacing Slider */}
+                                <div className="space-y-3">
+                                    <div className="flex justify-between text-xs text-neutral-400 uppercase font-mono">
+                                        <span>{language === 'en' ? 'Slow / Tension' : 'Lento / Tensión'}</span>
+                                        <span>{language === 'en' ? 'Fast / Chaos' : 'Rápido / Caos'}</span>
+                                    </div>
+                                    <input
+                                        type="range" min="0" max="100" value={pacing}
+                                        onChange={(e) => updateAtmosphere(parseInt(e.target.value), contrast)}
+                                        className="w-full h-2 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-amber-500"
+                                    />
+                                    <div className="text-xs text-center text-amber-500 font-mono">{pacing}% {language === 'en' ? 'Pacing' : 'Ritmo'}</div>
+                                </div>
+
+                                {/* Contrast Slider */}
+                                <div className="space-y-3">
+                                    <div className="flex justify-between text-xs text-neutral-400 uppercase font-mono">
+                                        <span>{language === 'en' ? 'Natural' : 'Natural'}</span>
+                                        <span>{language === 'en' ? 'Stylized' : 'Estilizado'}</span>
+                                    </div>
+                                    <input
+                                        type="range" min="0" max="100" value={contrast}
+                                        onChange={(e) => updateAtmosphere(pacing, parseInt(e.target.value))}
+                                        className="w-full h-2 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                                    />
+                                    <div className="text-xs text-center text-indigo-400 font-mono">{contrast}% {language === 'en' ? 'Contrast' : 'Contraste'}</div>
+                                </div>
+                            </section>
+                        )}
+                    </div>
+
+                    {/* Right Column: The Detailed Shot List */}
+                    <div className="lg:col-span-9">
+                        {generatedConcept ? (
+                            <div className="bg-neutral-950 border border-neutral-800 rounded-xl overflow-hidden min-h-[600px] flex flex-col relative">
+
+                                {advisorNote && (
+                                    <div className="bg-indigo-500/10 border-b border-indigo-500/20 p-3 text-sm text-indigo-200 flex items-start gap-2">
+                                        <div className="mt-0.5"><Users size={16} /></div>
+                                        <p>{advisorNote}</p>
                                     </div>
                                 )}
 
-                                {/* STRUCTURE TAB */}
-                                {activeTab === 'structure' && (
-                                    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2">
-                                        <div className="space-y-4">
-                                            {generatedConcept.escaleta?.map((beat: any, i: number) => (
-                                                <div key={i} className="flex gap-4 p-5 bg-neutral-900/50 rounded-xl border border-neutral-800 hover:border-amber-500/30 transition-all items-start group">
-                                                    <div className="text-amber-500 font-mono text-xs font-bold whitespace-nowrap pt-3 w-20 bg-amber-500/10 py-1 px-2 rounded text-center">{beat.time}</div>
-                                                    <div className="flex-1 space-y-2">
-                                                        <input
-                                                            value={beat.title}
-                                                            onChange={(e) => handleUpdateEscaleta(i, 'title', e.target.value)}
-                                                            className="font-bold text-white text-lg bg-transparent border border-transparent hover:border-neutral-700 focus:border-amber-500 rounded px-2 -ml-2 w-full outline-none transition-colors"
-                                                        />
-                                                        <textarea
-                                                            value={beat.desc}
-                                                            onChange={(e) => handleUpdateEscaleta(i, 'desc', e.target.value)}
-                                                            rows={2}
-                                                            className="text-neutral-400 text-sm leading-relaxed bg-transparent border border-transparent hover:border-neutral-700 focus:border-amber-500 rounded px-2 -ml-2 w-full outline-none transition-colors resize-none"
-                                                        />
+                                {/* Header */}
+                                <div className="p-8 border-b border-neutral-800 bg-neutral-900/30">
+                                    <div className="flex justify-between items-end">
+                                        <div>
+                                            <div className="text-amber-500 text-xs font-bold uppercase tracking-widest mb-2 flex items-center gap-2">
+                                                <Film size={14} />
+                                                {language === 'en' ? 'Project Overview' : 'Resumen del Proyecto'}
+                                            </div>
+                                            <input
+                                                value={generatedConcept.title}
+                                                onChange={(e) => setGeneratedConcept({ ...generatedConcept, title: e.target.value })}
+                                                className="text-4xl font-extrabold text-white mb-2 bg-transparent border-none outline-none focus:ring-0 placeholder:text-neutral-700 w-full"
+                                                placeholder="Project Title"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Tabs Navigation */}
+                                <div className="flex border-b border-neutral-800 bg-neutral-900/50 px-8 gap-6">
+                                    <button
+                                        onClick={() => setActiveTab('concept')}
+                                        className={cn("py-4 text-sm font-bold border-b-2 transition-colors flex items-center gap-2", activeTab === 'concept' ? "border-amber-500 text-white" : "border-transparent text-neutral-500 hover:text-neutral-300")}
+                                    >
+                                        <Sparkles size={14} />
+                                        {language === 'en' ? 'Concept' : 'Concepto'}
+                                    </button>
+                                    <button
+                                        onClick={() => setActiveTab('structure')}
+                                        className={cn("py-4 text-sm font-bold border-b-2 transition-colors flex items-center gap-2", activeTab === 'structure' ? "border-amber-500 text-white" : "border-transparent text-neutral-500 hover:text-neutral-300")}
+                                    >
+                                        <Trophy size={14} />
+                                        {language === 'en' ? 'Structure' : 'Estructura'}
+                                    </button>
+                                    <button
+                                        onClick={() => setActiveTab('shotlist')}
+                                        className={cn("py-4 text-sm font-bold border-b-2 transition-colors flex items-center gap-2", activeTab === 'shotlist' ? "border-amber-500 text-white" : "border-transparent text-neutral-500 hover:text-neutral-300")}
+                                    >
+                                        <Clapperboard size={14} />
+                                        {language === 'en' ? 'Shot List' : 'Guion Técnico'}
+                                    </button>
+                                </div>
+
+                                {/* Content Area */}
+                                <div className="p-8 space-y-4 overflow-y-auto bg-neutral-950 flex-1">
+
+                                    {/* CONCEPT TAB */}
+                                    {activeTab === 'concept' && (
+                                        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2">
+                                            <div>
+                                                <h3 className="text-neutral-500 text-sm font-mono uppercase mb-2">Logline</h3>
+                                                <p className="text-2xl text-white leading-relaxed font-serif italic border-l-4 border-amber-500 pl-4">
+                                                    "{generatedConcept.logline}"
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <h3 className="text-neutral-500 text-sm font-mono uppercase mb-2">{language === 'en' ? 'Visual References' : 'Referencias Visuales'}</h3>
+                                                <p className="text-neutral-300">{generatedConcept.ref}</p>
+                                            </div>
+                                            <div className="p-5 bg-emerald-900/10 border border-emerald-900/30 rounded-xl">
+                                                <h3 className="text-emerald-500 text-sm font-bold mb-2 flex items-center gap-2">
+                                                    <Target size={14} />
+                                                    {language === 'en' ? 'Director\'s Note' : 'Nota del Director'}
+                                                </h3>
+                                                <p className="text-emerald-200/80 text-sm leading-relaxed">
+                                                    {language === 'en'
+                                                        ? "The structure focuses on establishing atmosphere before introducing the central conflict. This slow-burn approach is highly effective for festival circuits like Sundance or Berlin."
+                                                        : "La estructura se centra en establecer la atmósfera antes de introducir el conflicto central. Este enfoque 'slow-burn' es muy efectivo para circuitos de festivales como Sundance o Berlín."}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* STRUCTURE TAB */}
+                                    {activeTab === 'structure' && (
+                                        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2">
+                                            <div className="space-y-4">
+                                                {generatedConcept.escaleta?.map((beat: any, i: number) => (
+                                                    <div key={i} className="flex gap-4 p-5 bg-neutral-900/50 rounded-xl border border-neutral-800 hover:border-amber-500/30 transition-all items-start group">
+                                                        <div className="text-amber-500 font-mono text-xs font-bold whitespace-nowrap pt-3 w-20 bg-amber-500/10 py-1 px-2 rounded text-center">{beat.time}</div>
+                                                        <div className="flex-1 space-y-2">
+                                                            <input
+                                                                value={beat.title}
+                                                                onChange={(e) => handleUpdateEscaleta(i, 'title', e.target.value)}
+                                                                className="font-bold text-white text-lg bg-transparent border border-transparent hover:border-neutral-700 focus:border-amber-500 rounded px-2 -ml-2 w-full outline-none transition-colors"
+                                                            />
+                                                            <textarea
+                                                                value={beat.desc}
+                                                                onChange={(e) => handleUpdateEscaleta(i, 'desc', e.target.value)}
+                                                                rows={2}
+                                                                className="text-neutral-400 text-sm leading-relaxed bg-transparent border border-transparent hover:border-neutral-700 focus:border-amber-500 rounded px-2 -ml-2 w-full outline-none transition-colors resize-none"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+
+                                            {/* AI ENDING PROPOSAL */}
+                                            {generatedConcept.suggestedEnding && (
+                                                <div className="mt-4 p-6 border border-amber-500/20 bg-gradient-to-br from-amber-500/5 to-neutral-900 rounded-xl relative overflow-hidden group hover:border-amber-500/40 transition-all">
+                                                    <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                                                        <Sparkles size={120} />
+                                                    </div>
+
+                                                    <h4 className="text-amber-500 font-bold mb-3 flex items-center gap-2 text-sm uppercase tracking-wider">
+                                                        <Sparkles size={16} />
+                                                        {language === 'en' ? 'AI Suggestion: Alternate Ending' : 'Sugerencia IA: Final Alternativo'}
+                                                    </h4>
+
+                                                    <h3 className="text-xl font-serif text-white italic mb-2">
+                                                        "{generatedConcept.suggestedEnding.title}"
+                                                    </h3>
+                                                    <p className="text-neutral-300 text-sm leading-relaxed max-w-2xl relative z-10">
+                                                        {generatedConcept.suggestedEnding.desc}
+                                                    </p>
+
+                                                    <div className="mt-4 flex gap-3">
+                                                        <button className="px-4 py-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 text-xs font-bold rounded-lg transition-colors border border-amber-500/20">
+                                                            {language === 'en' ? 'Adopt this Ending' : 'Adoptar este Final'}
+                                                        </button>
                                                     </div>
                                                 </div>
-                                            ))}
+                                            )}
                                         </div>
+                                    )}
 
-                                        {/* AI ENDING PROPOSAL */}
-                                        {generatedConcept.suggestedEnding && (
-                                            <div className="mt-4 p-6 border border-amber-500/20 bg-gradient-to-br from-amber-500/5 to-neutral-900 rounded-xl relative overflow-hidden group hover:border-amber-500/40 transition-all">
-                                                <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                                                    <Sparkles size={120} />
-                                                </div>
-
-                                                <h4 className="text-amber-500 font-bold mb-3 flex items-center gap-2 text-sm uppercase tracking-wider">
-                                                    <Sparkles size={16} />
-                                                    {language === 'en' ? 'AI Suggestion: Alternate Ending' : 'Sugerencia IA: Final Alternativo'}
-                                                </h4>
-
-                                                <h3 className="text-xl font-serif text-white italic mb-2">
-                                                    "{generatedConcept.suggestedEnding.title}"
-                                                </h3>
-                                                <p className="text-neutral-300 text-sm leading-relaxed max-w-2xl relative z-10">
-                                                    {generatedConcept.suggestedEnding.desc}
-                                                </p>
-
-                                                <div className="mt-4 flex gap-3">
-                                                    <button className="px-4 py-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 text-xs font-bold rounded-lg transition-colors border border-amber-500/20">
-                                                        {language === 'en' ? 'Adopt this Ending' : 'Adoptar este Final'}
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-
-                                {/* SHOT LIST TAB */}
-                                {activeTab === 'shotlist' && (
-                                    <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
-                                        {generatedConcept.shotList?.map((shot: any, index: number) => (
+                                    {/* SHOT LIST TAB */}
+                                    {activeTab === 'shotlist' && (
+                                        <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
+                                            {generatedConcept.shotList?.map((shot: any, index: number) => (
                                                 <div key={index} className={cn(
                                                     "group border rounded-lg p-5 transition-all flex gap-6 items-start",
                                                     editingShotIndex === index
@@ -1269,18 +1267,18 @@ return (
                                                                     />
                                                                 </div>
                                                             </div>
-                                                            
+
                                                             {/* STORYBOARD UPLOAD AREA */}
                                                             <div className="mt-4 pt-4 border-t border-neutral-800">
                                                                 <h4 className="text-[10px] uppercase text-neutral-500 font-bold mb-2 flex items-center gap-2">
                                                                     <Film size={12} />
                                                                     Storyboard / Reference
                                                                 </h4>
-                                                                
+
                                                                 {shot.storyboardImage ? (
                                                                     <div className="relative w-48 h-28 group/img overflow-hidden rounded-lg border border-neutral-700">
                                                                         <img src={shot.storyboardImage} alt="Storyboard" className="w-full h-full object-cover" />
-                                                                        <button 
+                                                                        <button
                                                                             onClick={() => handleRemoveImage(index)}
                                                                             className="absolute top-1 right-1 bg-red-500/80 hover:bg-red-600 text-white p-1 rounded-full opacity-0 group-hover/img:opacity-100 transition-opacity"
                                                                         >
@@ -1298,10 +1296,6 @@ return (
                                                                         </label>
                                                                     </div>
                                                                 )}
-                                                            </div>
-
-                                                        </div>
-                                                    ) : (
                                                             </div>
 
                                                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -1357,151 +1351,154 @@ return (
                                                                 </button>
                                                             </div>
                                                         </div>
-                                ) : (
-                                // VIEW MODE
-                                <>
-                                    {/* ID & Lens */}
-                                    <div className="flex flex-col items-center justify-center w-16 shrink-0 gap-2">
-                                        <div className="text-2xl font-black text-neutral-700 group-hover:text-amber-500/50 transition-colors">{shot.id}</div>
-                                        <div className="px-2 py-1 bg-neutral-950 rounded text-xs font-mono text-neutral-400 border border-neutral-800">{shot.lens}</div>
-                                    </div>
+                                                    ) : (
+                                                        // VIEW MODE
+                                                        <>
+                                                            {/* ID & Lens */}
+                                                            <div className="flex flex-col items-center justify-center w-16 shrink-0 gap-2">
+                                                                <div className="text-2xl font-black text-neutral-700 group-hover:text-amber-500/50 transition-colors">{shot.id}</div>
+                                                                <div className="px-2 py-1 bg-neutral-950 rounded text-xs font-mono text-neutral-400 border border-neutral-800">{shot.lens}</div>
+                                                            </div>
 
-                                    {/* Shot Details */}
-                                    <div className="flex-1 space-y-2">
-                                        <div className="flex flex-wrap items-center gap-3 mb-1">
-                                            <span className={cn(
-                                                "font-bold text-xs px-2 py-0.5 rounded border transition-all",
-                                                shot.type === 'MASTER SHOT'
-                                                    ? "bg-amber-500 text-black border-amber-400 shadow-[0_0_10px_rgba(245,158,11,0.3)]"
-                                                    : "text-amber-500 bg-amber-950/20 border-amber-900/40"
-                                            )}>
-                                                SC {shot.scene}
-                                            </span>
-                                            <span className="font-bold text-xs px-2 py-0.5 rounded border border-neutral-700 bg-neutral-800 text-neutral-300">
-                                                {language === 'en' ? 'SHOT' : 'PLANO'} {shot.id}
-                                            </span>
-                                            <span className={cn(
-                                                "font-bold tracking-wide text-sm uppercase px-2 py-0.5 rounded border",
-                                                shot.type === 'MASTER SHOT'
-                                                    ? "bg-emerald-500 text-black border-emerald-400"
-                                                    : "text-emerald-400 bg-emerald-950/30 border-emerald-900/50"
-                                            )}>
-                                                {shot.type}
-                                            </span>
-                                            <span className="text-neutral-500 text-xs font-mono">{shot.time}</span>
-                                        </div>
-                                        <h3 className="text-lg font-bold text-white leading-snug">{shot.subject}</h3>
-                                        {shot.description_detail && (
-                                            <p className="text-sm text-neutral-400 mt-1 italic leading-relaxed">{shot.description_detail}</p>
-                                        )}
+                                                            {/* Shot Details */}
+                                                            <div className="flex-1 space-y-2">
+                                                                <div className="flex flex-wrap items-center gap-3 mb-1">
+                                                                    <span className={cn(
+                                                                        "font-bold text-xs px-2 py-0.5 rounded border transition-all",
+                                                                        shot.type === 'MASTER SHOT'
+                                                                            ? "bg-amber-500 text-black border-amber-400 shadow-[0_0_10px_rgba(245,158,11,0.3)]"
+                                                                            : "text-amber-500 bg-amber-950/20 border-amber-900/40"
+                                                                    )}>
+                                                                        SC {shot.scene}
+                                                                    </span>
+                                                                    <span className="font-bold text-xs px-2 py-0.5 rounded border border-neutral-700 bg-neutral-800 text-neutral-300">
+                                                                        {language === 'en' ? 'SHOT' : 'PLANO'} {shot.id}
+                                                                    </span>
+                                                                    <span className={cn(
+                                                                        "font-bold tracking-wide text-sm uppercase px-2 py-0.5 rounded border",
+                                                                        shot.type === 'MASTER SHOT'
+                                                                            ? "bg-emerald-500 text-black border-emerald-400"
+                                                                            : "text-emerald-400 bg-emerald-950/30 border-emerald-900/50"
+                                                                    )}>
+                                                                        {shot.type}
+                                                                    </span>
+                                                                    <span className="text-neutral-500 text-xs font-mono">{shot.time}</span>
+                                                                </div>
+                                                                <h3 className="text-lg font-bold text-white leading-snug">{shot.subject}</h3>
+                                                                {shot.description_detail && (
+                                                                    <p className="text-sm text-neutral-400 mt-1 italic leading-relaxed">{shot.description_detail}</p>
+                                                                )}
 
-                                        {/* Audio, Props, Detail, Actors & Notes */}
-                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3 pt-3 border-t border-neutral-800/50">
-                                            <div className="flex flex-col gap-1">
-                                                <span className="text-neutral-600 uppercase font-black text-[9px]">{language === 'en' ? 'AUDIO / SFX' : 'SONIDO/ EFECTOS'}:</span>
-                                                <span className="text-xs text-neutral-400">{shot.audio}</span>
-                                            </div>
-                                            <div className="flex flex-col gap-1">
-                                                <span className="text-neutral-600 uppercase font-black text-[9px]">{language === 'en' ? 'DESCRIPTION' : 'DESCRIPCIÓN'}:</span>
-                                                <span className="text-xs text-neutral-300 italic">{shot.description_detail || "-"}</span>
-                                            </div>
-                                            <div className="flex flex-col gap-1">
-                                                <span className="text-neutral-600 uppercase font-black text-[9px]">{language === 'en' ? 'PROPS' : 'UTILERÍA'}:</span>
-                                                <span className="text-xs text-neutral-400">{shot.props || "-"}</span>
-                                            </div>
-                                            <div className="flex flex-col gap-1">
-                                                <span className="text-neutral-600 uppercase font-black text-[9px]">{language === 'en' ? 'DETAIL' : 'DETALLE'}:</span>
-                                                <span className="text-xs text-indigo-400">{shot.detail_shot || "-"}</span>
-                                            </div>
-                                            <div className="flex flex-col gap-1">
-                                                <span className="text-neutral-600 uppercase font-black text-[9px]">{language === 'en' ? 'ACTORS' : 'ACTORES'}:</span>
-                                                <span className="text-xs text-emerald-400">{shot.actors || "-"}</span>
-                                            </div>
-                                            {shot.type === 'MASTER SHOT' && (
-                                                <div className="flex flex-col gap-1 md:col-span-2">
-                                                    <span className="text-amber-500/50 uppercase font-black text-[9px]">{language === 'en' ? 'DIRECTOR NOTE' : 'NOTA DIRECTOR'}:</span>
-                                                    <span className="text-xs text-amber-200/70">{shot.note}</span>
+                                                                {/* Audio, Props, Detail, Actors & Notes */}
+                                                                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3 pt-3 border-t border-neutral-800/50">
+                                                                    <div className="flex flex-col gap-1">
+                                                                        <span className="text-neutral-600 uppercase font-black text-[9px]">{language === 'en' ? 'AUDIO / SFX' : 'SONIDO/ EFECTOS'}:</span>
+                                                                        <span className="text-xs text-neutral-400">{shot.audio}</span>
+                                                                    </div>
+                                                                    <div className="flex flex-col gap-1">
+                                                                        <span className="text-neutral-600 uppercase font-black text-[9px]">{language === 'en' ? 'DESCRIPTION' : 'DESCRIPCIÓN'}:</span>
+                                                                        <span className="text-xs text-neutral-300 italic">{shot.description_detail || "-"}</span>
+                                                                    </div>
+                                                                    <div className="flex flex-col gap-1">
+                                                                        <span className="text-neutral-600 uppercase font-black text-[9px]">{language === 'en' ? 'PROPS' : 'UTILERÍA'}:</span>
+                                                                        <span className="text-xs text-neutral-400">{shot.props || "-"}</span>
+                                                                    </div>
+                                                                    <div className="flex flex-col gap-1">
+                                                                        <span className="text-neutral-600 uppercase font-black text-[9px]">{language === 'en' ? 'DETAIL' : 'DETALLE'}:</span>
+                                                                        <span className="text-xs text-indigo-400">{shot.detail_shot || "-"}</span>
+                                                                    </div>
+                                                                    <div className="flex flex-col gap-1">
+                                                                        <span className="text-neutral-600 uppercase font-black text-[9px]">{language === 'en' ? 'ACTORS' : 'ACTORES'}:</span>
+                                                                        <span className="text-xs text-emerald-400">{shot.actors || "-"}</span>
+                                                                    </div>
+                                                                    {shot.type === 'MASTER SHOT' && (
+                                                                        <div className="flex flex-col gap-1 md:col-span-2">
+                                                                            <span className="text-amber-500/50 uppercase font-black text-[9px]">{language === 'en' ? 'DIRECTOR NOTE' : 'NOTA DIRECTOR'}:</span>
+                                                                            <span className="text-xs text-amber-200/70">{shot.note}</span>
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+
+                                                            {/* Action Buttons */}
+                                                            <div className="flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity translate-x-4 group-hover:translate-x-0">
+                                                                <div className="flex flex-col gap-1 bg-neutral-900 border border-neutral-800 rounded-lg p-1">
+                                                                    <button
+                                                                        onClick={() => handleAddShotAt(index)}
+                                                                        className="p-1.5 hover:bg-neutral-800 rounded text-amber-500/70 hover:text-amber-500 transition-colors flex items-center gap-2 text-[10px] font-bold"
+                                                                        title={language === 'en' ? "Insert Shot After" : "Insertar Plano Después"}
+                                                                    >
+                                                                        <Plus size={14} /> {language === 'en' ? "SHOT" : "PLANO"}
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={() => handleAddSceneAt(index)}
+                                                                        className="p-1.5 hover:bg-neutral-800 rounded text-emerald-500/70 hover:text-emerald-500 transition-colors flex items-center gap-2 text-[10px] font-bold border-t border-neutral-800"
+                                                                        title={language === 'en' ? "Insert Scene After" : "Insertar Escena Después"}
+                                                                    >
+                                                                        <Clapperboard size={14} /> {language === 'en' ? "SCENE" : "ESCENA"}
+                                                                    </button>
+                                                                </div>
+                                                                <button
+                                                                    onClick={() => setEditingShotIndex(index)}
+                                                                    className="p-2 hover:bg-neutral-800 rounded text-neutral-400 hover:text-white transition-colors"
+                                                                    title="Edit"
+                                                                >
+                                                                    <Edit2 size={16} />
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => handleDeleteShot(index)}
+                                                                    className="p-2 hover:bg-red-900/30 rounded text-neutral-400 hover:text-red-400 transition-colors"
+                                                                    title="Delete"
+                                                                >
+                                                                    <Trash2 size={16} />
+                                                                </button>
+                                                            </div>
+                                                        </>
+                                                    )}
                                                 </div>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    {/* Action Buttons */}
-                                    <div className="flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity translate-x-4 group-hover:translate-x-0">
-                                        <div className="flex flex-col gap-1 bg-neutral-900 border border-neutral-800 rounded-lg p-1">
-                                            <button
-                                                onClick={() => handleAddShotAt(index)}
-                                                className="p-1.5 hover:bg-neutral-800 rounded text-amber-500/70 hover:text-amber-500 transition-colors flex items-center gap-2 text-[10px] font-bold"
-                                                title={language === 'en' ? "Insert Shot After" : "Insertar Plano Después"}
-                                            >
-                                                <Plus size={14} /> {language === 'en' ? "SHOT" : "PLANO"}
-                                            </button>
-                                            <button
-                                                onClick={() => handleAddSceneAt(index)}
-                                                className="p-1.5 hover:bg-neutral-800 rounded text-emerald-500/70 hover:text-emerald-500 transition-colors flex items-center gap-2 text-[10px] font-bold border-t border-neutral-800"
-                                                title={language === 'en' ? "Insert Scene After" : "Insertar Escena Después"}
-                                            >
-                                                <Clapperboard size={14} /> {language === 'en' ? "SCENE" : "ESCENA"}
-                                            </button>
-                                        </div>
-                                        <button
-                                            onClick={() => setEditingShotIndex(index)}
-                                            className="p-2 hover:bg-neutral-800 rounded text-neutral-400 hover:text-white transition-colors"
-                                            title="Edit"
-                                        >
-                                            <Edit2 size={16} />
-                                        </button>
-                                        <button
-                                            onClick={() => handleDeleteShot(index)}
-                                            className="p-2 hover:bg-red-900/30 rounded text-neutral-400 hover:text-red-400 transition-colors"
-                                            title="Delete"
-                                        >
-                                            <Trash2 size={16} />
-                                        </button>
-                                    </div>
-                                </>
-                            </div>
                                             ))}
 
-                            <div className="flex justify-center pt-8 pb-4 gap-4">
-                                <button
-                                    onClick={() => handleAddSceneAt((generatedConcept.shotList?.length || 1) - 1)}
-                                    className="text-neutral-500 hover:text-amber-500 transition-colors text-sm flex items-center gap-2 group"
-                                >
-                                    <div className="w-8 h-8 rounded-full border border-dashed border-neutral-600 flex items-center justify-center group-hover:border-amber-500 group-hover:bg-amber-500/10 transition-all">
-                                        <Film size={16} />
-                                    </div>
-                                    {language === 'en' ? 'Add Final Scene' : 'Añadir Escena Final'}
-                                </button>
+                                            <div className="flex justify-center pt-8 pb-4 gap-4">
+                                                <button
+                                                    onClick={() => handleAddSceneAt((generatedConcept.shotList?.length || 1) - 1)}
+                                                    className="text-neutral-500 hover:text-amber-500 transition-colors text-sm flex items-center gap-2 group"
+                                                >
+                                                    <div className="w-8 h-8 rounded-full border border-dashed border-neutral-600 flex items-center justify-center group-hover:border-amber-500 group-hover:bg-amber-500/10 transition-all">
+                                                        <Film size={16} />
+                                                    </div>
+                                                    {language === 'en' ? 'Add Final Scene' : 'Añadir Escena Final'}
+                                                </button>
 
-                                <button
-                                    onClick={handleExportPDF}
-                                    className="text-neutral-500 hover:text-emerald-500 transition-colors text-sm flex items-center gap-2 group"
-                                >
-                                    <div className="w-8 h-8 rounded-full border border-dashed border-neutral-600 flex items-center justify-center group-hover:border-emerald-500 group-hover:bg-emerald-500/10 transition-all">
-                                        <FileDown size={16} />
-                                    </div>
-                                    {language === 'en' ? 'Export to PDF' : 'Exportar a PDF'}
-                                </button>
+                                                <button
+                                                    onClick={handleExportPDF}
+                                                    className="text-neutral-500 hover:text-emerald-500 transition-colors text-sm flex items-center gap-2 group"
+                                                >
+                                                    <div className="w-8 h-8 rounded-full border border-dashed border-neutral-600 flex items-center justify-center group-hover:border-emerald-500 group-hover:bg-emerald-500/10 transition-all">
+                                                        <FileDown size={16} />
+                                                    </div>
+                                                    {language === 'en' ? 'Export to PDF' : 'Exportar a PDF'}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
-                        </div>
-                    )}
+                        ) : (
+                            <div className="h-full border-2 border-dashed border-neutral-800 rounded-xl flex flex-col items-center justify-center p-8 text-center bg-neutral-900/20">
+                                <Film size={48} className="text-neutral-700 mb-4" />
+                                <h3 className="text-xl font-bold text-neutral-500 mb-2">
+                                    {language === 'en' ? 'Script Generator' : 'Generador de Guiones'}
+                                </h3>
+                                <p className="text-neutral-600 max-w-sm">
+                                    {language === 'en'
+                                        ? 'Enter your vision on the left and generate a complete project breakdown.'
+                                        : 'Introduce tu visión a la izquierda y genera un desglose de proyecto completo.'}
+                                </p>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
-            ) : (
-            <div className="h-full border-2 border-dashed border-neutral-800 rounded-xl flex flex-col items-center justify-center p-8 text-center bg-neutral-900/20">
-                <Film size={48} className="text-neutral-700 mb-4" />
-                <h3 className="text-xl font-bold text-neutral-500 mb-2">
-                    {language === 'en' ? 'Script Generator' : 'Generador de Guiones'}
-                </h3>
-                <p className="text-neutral-600 max-w-sm">
-                    {language === 'en'
-                        ? 'Enter your vision on the left and generate a complete project breakdown.'
-                        : 'Introduce tu visión a la izquierda y genera un desglose de proyecto completo.'}
-                </p>
-            </div>
-            )}
-        </div>
-    </main>
-);
+        </main >
+    );
 }
